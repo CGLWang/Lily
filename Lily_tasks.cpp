@@ -217,6 +217,6 @@ int task_mointor()
 	int dt = t - last_t;
 	last_t = t;
 	sprintf(tx, "using %d ms\n", dt);
-	lily_cout(tx);
+	//lily_cout(tx);
 	return 1;
 }
