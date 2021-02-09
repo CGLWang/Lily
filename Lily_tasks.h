@@ -44,4 +44,4 @@ void endTaskAt_(char index);
 #endif // Tasks_using_queue
 
 void run_tasks();
-char task_mointor();
+int task_mointor();

@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include "Lily.h"
 #include "Lily_basic.h"
@@ -14,18 +15,13 @@ char str_startwith(char* s, char* cmd)
 	return 1;
 }
 
-/*
-s :rx content, setv(100,0);
-cmd: cmd str, setv
-consider ':' as a end of string as well
-*/
+
 char str_equal(char* s, char* cmd)
 {
 	if (s[0] == '\0') return 0;
 
 	int i = 0;
 	char a, b;
-
 	do
 	{
 		a = s[i];
@@ -41,15 +37,13 @@ char str_equal(char* s, char* cmd)
 	if (a == '\0' && b != '\0')return 0;
 
 	if ('a' <= a && a <= 'z')return 0;
-
+	if ('0' <= a && a <= '9')return 0;
 	return i;
 }
 int str_index(char* s, char c) //return 0 or 1
 {
 	int i;
-	int n = strlen(s);
-
-	for (i = 0; i < n; i++)
+	for (i = 0; s[i] !='\0'; i++)
 		if (s[i] == c)return i;
 
 	return -1;
@@ -88,6 +82,44 @@ char str_replace(char* s, char from, char to)
 
 	return times;
 }
+
+//in place
+Li_List str_split(char* str, char split_char)
+{
+	Li_List list = new_list(sizeof(char*), 4);
+	if (*str == '\0')
+		return list;
+	char *last,*next;
+	char* now = str;
+	if (*now != split_char)
+	{
+		list_add(list, &str);
+	}
+	last = now;
+	now++;
+	next = now;
+	while (*now != '\0')
+	{
+		if (*last == split_char && *now != split_char)
+		{
+			li_add(list, now);
+			/**last = '\0';*/
+		}
+		if (*last != split_char && *now == split_char)
+		{
+			*now = '\0';
+			last = &split_char;
+			now++;// = next;
+			//next++;
+			continue;
+		}
+		
+		last = now;
+		now++; //= next;
+		//next++;
+	}
+	return list;
+}
 // add the num to a string
 // return: length of num
 char int_to_string(int n, char* s)
@@ -125,14 +157,14 @@ char int_to_string(int n, char* s)
 float* get_nums_from_rx(char* rs, int* length_back)
 {
 	static float nums[10];
-	int i, k=0;
+	int i, k = 0;
 	float j = 10.0f;
-	bool negative=false;
+	bool negative = false;
 	j = 10.0f;
-	bool has_decimal=false;
+	bool has_decimal = false;
 	float integer = 0.0f, decimal = 0.0f;
 	char c;
-	bool last_is_numeric=false;
+	bool last_is_numeric = false;
 	for (i = 0; rs[i] != '\0'; i++)
 	{
 		c = rs[i];
@@ -234,7 +266,7 @@ char** get_paras_from_rx(char* rx, int* len)
 	is_last_a_letter = false;
 	while (*rx != '\0')
 	{
-		if ('a' <= *rx && *rx <= 'z' ||*rx=='_')// a letter
+		if ('a' <= *rx && *rx <= 'z' || *rx == '_')// a letter
 		{
 			if (!is_last_a_letter)//begin
 			{
@@ -254,7 +286,7 @@ char** get_paras_from_rx(char* rx, int* len)
 		rx++;
 		is_last_a_letter = false;
 	}
-	
+
 	s[i][j] = '\0';
 	if (is_last_a_letter)//end
 	{
@@ -280,7 +312,7 @@ void limit_from_to(float* x, float lower, float upper)
 }
 
 
-char init_list(List* list, unsigned int unit_size2, unsigned int init_cap)
+int init_list(Lily_List* list, unsigned int unit_size2, unsigned int init_cap)
 {
 	list->type_size = unit_size2;
 	list->cap = 0;
@@ -290,9 +322,9 @@ char init_list(List* list, unsigned int unit_size2, unsigned int init_cap)
 	list->count = 0;
 	return 0;
 }
-List* new_list(unsigned int type, unsigned int init_cap)
+Lily_List* new_list(unsigned int type, unsigned int init_cap)
 {
-	List* list = (List*)malloc(sizeof(List));
+	Lily_List* list = (Lily_List*)malloc(sizeof(Lily_List));
 	if (list == NULL)return list;
 	list->count = 0;
 	list->type_size = type;
@@ -304,29 +336,29 @@ List* new_list(unsigned int type, unsigned int init_cap)
 
 	return list;
 }
-char list_recap(List* list, unsigned int new_cap)
+int list_recap(Lily_List* list, unsigned int new_cap)
 {
 	void* p;
 	p = realloc(list->content, new_cap * list->type_size);
 	if (p == NULL)
 	{
-		return List_no_space;
+		return -1;
 	}
 	list->content = (char*)p;
-	list->cap += 5;
-	return List_normal_code;
+	list->cap = new_cap;
+	return 0;
 }
-char list_add(List* list, void* c)
+int list_add(Lily_List* list, void* c)
 {
 	if (list->count >= list->cap)
-		if (list_recap(list, list->cap + 5))return List_no_space;
+		if (list_recap(list, list->cap + 5))return -1;
 	memcpy((char*)(list->content) + list->count * list->type_size, c, list->type_size);
 	list->count++;
-	return List_normal_code;
+	return list->count - 1;
 }
-char list_remove_at(List* list, unsigned int index)
+int list_remove_at(Lily_List* list, unsigned int index)
 {
-	if (index >= list->count)return List_index_overflow;
+	if (index >= list->count)return -1;
 	char* i, * n, * p;
 	list->count--;
 	n = list->content + list->count * list->type_size;
@@ -334,7 +366,7 @@ char list_remove_at(List* list, unsigned int index)
 	p = i + list->type_size;
 	for (; i < n; i++, p++)*i = *p;
 	//while (i < n) *(i++) = *(p++);
-	return List_normal_code;
+	return 0;
 }
 bool list_item_equal(void* item_a, void* item_b, unsigned int type)
 {
@@ -347,17 +379,17 @@ bool list_item_equal(void* item_a, void* item_b, unsigned int type)
 	}
 	return true;
 }
-char list_remove(List* list, void* item)
+int list_remove(Lily_List* list, void* item)
 {
 	int i;
 	char* p = list->content;
 	for (i = 0; i < list->count; i++, p += list->type_size)
 		if (list_item_equal(item, p, list->type_size))break;
-	if (i == list->count)return List_not_found;
+	if (i == list->count)return -1;
 	list_remove_at(list, i);
-	return List_normal_code;
+	return 0;
 }
-int list_find(List* list, void* item)
+int list_find(Lily_List* list, void* item)
 {
 	int i;
 	char* p = list->content;
@@ -365,11 +397,50 @@ int list_find(List* list, void* item)
 		if (list_item_equal(item, p, list->type_size))return i;
 	return -1;
 }
-char delete_list(List* list)
+int delete_list(Lily_List* list)
 {
-	if (list == NULL)return List_null_ptr;
+	if (list == NULL)return -1;
 	if (list->content != NULL)
 		free(list->content);
 	free(list);
-	return List_normal_code;
+	return 0;
+}
+
+
+Li_String new_li_string_by(char* str)
+{
+	Li_String li_string = (Li_String)malloc(sizeof(Li_String_def));
+	if (li_string == NULL)return NULL;
+	int n = strlen(str);
+	li_string->str =(char*) malloc(n+1);
+	
+	if (li_string->str == NULL)
+	{
+		free(li_string);
+		return NULL;
+	}
+	strcpy(li_string->str, str);
+	li_string->length = n;
+	return li_string;
+}
+void delete_li_string(Li_String li)
+{
+	free(li->str);
+	free(li);
+}
+int assign_li_string(Li_String li, char* source)
+{
+	int n = strlen(source);
+	if (n > li->length)
+	{
+		void* p = realloc(li->str, n+1);
+		if (p == NULL)
+		{
+			return -1;
+		}
+		li->str = (char*)p;
+	}
+	strcpy(li->str, source);
+	li->length = n;
+	return n;
 }

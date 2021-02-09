@@ -8,16 +8,16 @@
 typedef unsigned char byte;
 
 byte sum_check = 0;
-typedef struct 
-{
-	byte head[2];
-	byte length;
-}BaseFrame;
-typedef struct {
-	BaseFrame head;
-	unsigned short distance, strength, temperature;
-	byte sum_check;
-};
+//typedef struct 
+//{
+//	byte head[2];
+//	byte length;
+//}BaseFrame;
+//typedef struct {
+//	BaseFrame head;
+//	unsigned short distance, strength, temperature;
+//	byte sum_check;
+//};
 int r_count = 0;
 void lily_cin(char c)
 {
@@ -26,57 +26,52 @@ void lily_cin(char c)
 	static bool in_frame = false;
 	
 	r_count++;
-	if (r_count == 147)
-	{
-		cout << hasTask << " " << hasTask_ << head << " " << rear << endl;
-	}
-	switch (step)
-	{
-	case 0:
-		if (c == head[0])
-		{
-			step++;
-		}
-		break;
-
-	case 1:
-		if (c == head[1])
-			step ++;
-		else step = 0;
-		break;
-	case 2:
-		in_frame = true;
-		length = c;
-		sum_check = head[0] + head[1] + c;
-		step++;
-		break;
-	case 3:
-		length--;
-		if (length)
-		{
-			sum_check = head[0] + head[1] + c;
-		}
-		else//end
-		{
-			if (c != sum_check)
-			{
-				lily_cout("sum check failed\n");
-			}
-			rx[ri++] = c;
-			step = 0;
-			in_frame = false;
-			c = '\0';
-		}
-	default:
-		break;
-	}
-	if (!in_frame)
-	{
-		if (c == ';' || c == '\n')
-			c = '\0';
-		if (c == '\0')
-			addTask_(excute_command);
-	}
+	//switch (step)
+	//{
+	//case 0:
+	//	if (c == head[0])
+	//	{
+	//		step++;
+	//	}
+	//	break;
+	//case 1:
+	//	if (c == head[1])
+	//		step ++;
+	//	else step = 0;
+	//	break;
+	//case 2:
+	//	in_frame = true;
+	//	length = c;
+	//	sum_check = head[0] + head[1] + c;
+	//	step++;
+	//	break;
+	//case 3:
+	//	length--;
+	//	if (length)
+	//	{
+	//		sum_check = head[0] + head[1] + c;
+	//	}
+	//	else//end
+	//	{
+	//		if (c != sum_check)
+	//		{
+	//			lily_cout("sum check failed\n");
+	//		}
+	//		rx[ri++] = c;
+	//		step = 0;
+	//		in_frame = false;
+	//		c = '\0';
+	//	}
+	//default:
+	//	break;
+	//}
+	//if (!in_frame)
+	//{
+	if (c == ';' || c == '\n')
+		c = '\0';
+	if (c == '\0')
+		addTask_(shell_do);
+	//}
 	
 	rx[ri++] = c;
 #ifdef in_debug
@@ -101,21 +96,37 @@ void lily_init()
 	lily_ui.fields = new_list(sizeof(Field_def), 10);
 	lily_ui.hijacks = new_list(sizeof(hijack), 4);
 	lily_ui.para_updated = false;
+	lily_ui.hijacked = false;
 	if (lily_ui.cmds == NULL || lily_ui.fields == NULL|| lily_ui.hijacks==NULL)
 	{
 		lily_cout("lily init failed!");
 		return;
 	}
 	Cmd_def help;
-	help.cmd = (char*)"help";
-	help.annotation = (char*)"to see all cmd and fields";
-	help.type = with_paras;
+	help.name = (char*)"help";
+	help.annotation = (char*)"help [cmd1] [field1]... :to see all cmd and fields";
 	help.todo = cmd_help;
 	help.id = 0;
 	public_cmd(help);
+
+	Cmd_def pass;
+	pass.name = (char*)"pass";
+	pass.annotation = (char*)"pass [n]: to skip a cmd in queue or more than one cmds";
+	pass.todo = pass_cmd;
+	pass.id = 1;
+	public_cmd(pass);
+
+	pass.name = (char*)"delete";
+	pass.annotation = (char*)"delete field...: to delete a field or more";
+	pass.todo = delete_field;
+	pass.id = 2;
+	public_cmd(pass);
+
+
 	public_a_field("test_field", &test_fields);
-	Field_def fed = { (char*)"rcount",(char*)"received key count",(float*)&r_count,int_type };
+	Field_def fed = { (char*)"rcount",(char*)"_received key count",(float*)&r_count,'d' };
 	public_field(fed);
+	public_a_new_string_field((char*)"sf2",(char*) "_test string");
 	//timer
 	lily_timers.timer_works = new_list(sizeof(Tasks_def), 4);
 	lily_timers.peroids = new_list(sizeof(unsigned int), 4);

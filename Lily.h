@@ -18,8 +18,9 @@ using namespace std;
 #define in_debug
 #define end 0
 #define again 1
-typedef char(*Tasks_def)();//return 0 meas task ended
-typedef char (*Arg_Tasks_def)(void*, void*);
+typedef int(*Tasks_def)();//return 0 meas task ended
+//typedef int (*Arg_Tasks_def)(void* argc, void* argv);
+typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
 
 
 //[hardware interface]
@@ -31,20 +32,3 @@ void lily_tick();
 
 
 void lily_init();
-
-enum ActState {
-	onScerrn,
-	background,
-	closed
-};
-typedef struct{
-	Tasks_def tick;
-	char (*key_pressed)(char c);
-	void(*on_creat)();
-	void(*start)();
-	void(*go_background)();
-	void(*close)();
-	char* ico,*name;
-	ActState state;
-	int id;
-}BaseActivity;

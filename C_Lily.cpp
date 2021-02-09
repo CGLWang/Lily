@@ -18,18 +18,18 @@ unsigned int lily_millis()
     unsigned int a = GetTickCount64();
     return a / 1000;
 }
-char cmd_test0(void* arg,void*);
-char cmd_test1(void* arg, void*);
+int cmd_test0(int arg,char**);
+int cmd_test1(int arg, char**);
 
-char timer0();
+int timer0();
 
-char timer1();
+int timer1();
 
 void task6(char* s);
 
-char key_input_task();
-char sleep_task();
-char task4();
+int key_input_task();
+int sleep_task();
+int task4();
 
 int main()
 {
@@ -37,13 +37,21 @@ int main()
     lily_init();
     addTask(key_input_task);
     addTask(sleep_task);
-    
+    char s[] = "help s";
+    char* str = s;
+    cout << "ready";
+    Li_List list = str_split(str,' ');
+    for (int i = 0; i < list->count; i++)
+    {
+        char* *s2 = (char**)list_index(list, i);
+        cout << i << ":" << *s2 << endl;
+    }
     //addTask_(task4);
     Cmd_def cmd1;
     cmd1.annotation = (char*)"call exit";
-    cmd1.cmd =(char*) "exit";
+    cmd1.name =(char*) "exit";
     cmd1.todo = (Arg_Tasks_def)exit;
-    cmd1.type = with_both;
+    
     public_cmd(cmd1);
 
 	/*Cmd_def help;
@@ -59,22 +67,22 @@ int main()
     deal_byte_stream = task6;
     
     char buff[128];
-    char* p = (char*)"##9123456789nop\n";
-    strcpy(buff,p);
-    p = buff;
-    p[2] = 9;
+	/* char* p = (char*)"##9123456789nop\n";
+	 strcpy(buff,p);
+	 p = buff;
+	 p[2] = 9;
 
-    while (*p != '\0')
-    {
-        lily_cin(*p);
-        p++;
-    }
-    p = (char*)"help;guess\n";
-	while (*p != '\0')
-	{
-		lily_cin(*p);
-		p++;
-	}
+	 while (*p != '\0')
+	 {
+		 lily_cin(*p);
+		 p++;
+	 }
+	 p = (char*)"help;guess\n";
+	 while (*p != '\0')
+	 {
+		 lily_cin(*p);
+		 p++;
+	 }*/
     run_tasks();
     return 0;
 
@@ -93,7 +101,7 @@ void task6(char* s)
     cout << s;
 
 }
-char key_input_task()
+int key_input_task()
 {
 	static int c = 0;
 	c++;
@@ -112,7 +120,7 @@ char key_input_task()
 
     return 1;
 }
-char sleep_task()
+int sleep_task()
 {
     //static int c = 0;
 	//cout << "-->task2:sleep" << endl;
@@ -128,63 +136,63 @@ char sleep_task()
 
     return 1;
 }
-char cmd_test0(void* arg,void*send_s)
+int cmd_test0(int arg,char**send_s)
 {
 
-    Cmd_para_set_def* sets = (Cmd_para_set_def*)arg;
-    int i;
-    cout << "\ncmd\nnumbers:" << endl;
-    for (i = 0; i < sets->numbers_length; i++)
-        cout << sets->numbers[i]<<", ";
-    cout << endl;
-	cout << "paras:" << endl;
-	for (i = 0; i < sets->paras_length; i++)
-		cout << sets->paras[i] << ", ";
-	cout << endl;
+ //   Cmd_para_set_def* sets = (Cmd_para_set_def*)arg;
+ //   int i;
+ //   cout << "\ncmd\nnumbers:" << endl;
+ //   for (i = 0; i < sets->numbers_length; i++)
+ //       cout << sets->numbers[i]<<", ";
+ //   cout << endl;
+	//cout << "paras:" << endl;
+	//for (i = 0; i < sets->paras_length; i++)
+	//	cout << sets->paras[i] << ", ";
+	//cout << endl;
 
-    char** s = (char**)send_s;
-    *(char**)send_s =(char*) "done----";
+ //   char** s = (char**)send_s;
+ //   *(char**)send_s =(char*) "done----";
     
     return Cmd_send;
 }
-char task4()
+int task4()
 {
     //cout << "-->task4:done\n";
     return 0;
 }
-char cmd_test1(void* arg, void* send_s)
+int cmd_test1(int arg, char** send_s)
 {
-    static int step = 0;
-    char* str = (char*)arg;
-    char** send = (char**)send_s;
-    
-    if (step)
-    {
-       
-        if (str_index(str, 'y')>=0)
-        {
-            step = 0;
-            *send = (char*)"yes";
-            return Cmd_send_done_and_end;
-        }
-        else
-        {
-			*send = (char*)"no";
-			return Cmd_send;
-        }
-    }
-    step = 1;
-    cout << "frame cmd:" << str << endl;
-    add_hijack(cmd_test1);
+	//static int step = 0;
+	//char* str = (char*)arg;
+	//char** send = (char**)send_s;
+
+	//if (step)
+	//{
+
+	//	if (str_index(str, 'y') >= 0)
+	//	{
+	//		step = 0;
+	//		*send = (char*)"yes";
+	//		return Cmd_send_done_and_end;
+	//	}
+	//	else
+	//	{
+	//		*send = (char*)"no";
+	//		return Cmd_send;
+	//	}
+	//}
+	//step = 1;
+	//cout << "frame cmd:" << str << endl;
+	//add_hijack(cmd_test1);
 	return Cmd_send_done;
 }
 
-char timer0()
+int timer0()
 {
     //cout << "->timer0 tick 10cycles\n";
     return end;
 }
-char timer1()
+int timer1()
 {
     static int c = 0;
     c++;

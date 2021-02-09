@@ -171,7 +171,13 @@ void run_tasks()
 		i = rear;
 		while (front != i)
 		{
-			if (tasks_[front]())
+			if (tasks_[front] == NULL)
+			{
+				lily_cout("null ptr");
+				front++;
+				continue;
+			}
+			if (tasks_[front]()>0)
 				addTask_(tasks_[front]);
 			if (++front >= Tasks_LEN)
 				front = 0;
@@ -200,7 +206,7 @@ void run_tasks()
 }
 
 //monitor 
-char task_mointor()
+int task_mointor()
 {
 	static int c = 100;
 	static int last_t = 0;

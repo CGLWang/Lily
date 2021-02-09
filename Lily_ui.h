@@ -15,15 +15,15 @@ typedef struct
 * 
 */
 
-enum Cmd_type
-{
-	plain_text, // receive with plain text following by cmd key words in a command
-	with_numbers, // with numbers
-	with_paras, // with options substring
-	with_both, // both with numbers and options
-	with_bytes //receive with byte stream in the command
-};
-
+//enum Cmd_type
+//{
+//	plain_text, // receive with plain text following by cmd key words in a command
+//	with_numbers, // with numbers
+//	with_paras, // with options substring
+//	with_both, // both with numbers and options
+//	with_bytes //receive with byte stream in the command
+//};
+//
 
 /*Cmd_def
 	char* cmd;
@@ -35,7 +35,7 @@ enum Cmd_type
 typedef struct
 {
 	//string, cmd key word, which will used to distinct from each others 
-	char* cmd;
+	char* name;
 	// string, explain the function of this cmd
 	char* annotation;
 	// function pointer, with prototype: char(*)(void* paras_sets, &string msg_back)
@@ -44,15 +44,16 @@ typedef struct
 	//while other types will receive a struct containing numbers and options
 	// msg_back is a pointer to a string buffer, return message with it
 	Arg_Tasks_def todo;
-	Cmd_type type;
+	//Cmd_type type;
 	// a unique id for each cmd
 	char id;
 }Cmd_def;
-enum Fields_type
-{
-	float_type,
-	int_type
-};
+//enum Fields_type
+//{
+//	float_type,
+//	int_type,
+//	string_type
+//};
 
 /*
 * field def
@@ -63,22 +64,21 @@ enum Fields_type
 */
 typedef struct
 {
-	char* field;
+	char* name;
 	char* annotation;
-	float* ref;
-	Fields_type type;
+	void* ref;
+	char type;//'f','d','s'
 }Field_def;
 
 typedef struct
 {
-	/*Cmd_def* cmds;
-	Field_def* fields;
-
-	unsigned int cmds_len, fields_len;
-	unsigned int cmds_cap, fields_cap;*/
-	List* cmds, * fields, * hijacks;
-	bool para_updated;
+	Lily_List* cmds, * fields, * hijacks;
+	bool para_updated, hijacked;
 }Lily_cmds_def;
+// cmds and fields is copied since from adding.
+
+typedef Field_def* Field;
+typedef Cmd_def* Cmd;
 
 #define stack_len 4
 typedef char (*hijack)(char*);
@@ -105,7 +105,7 @@ extern void (*deal_byte_stream)(char*);
 #define frame_head_0 '#'
 #define frame_head_1 '#'
 
-char excute_command();
+int shell_do();
 
 //************************************
 // Method:    add_hijack
@@ -116,10 +116,18 @@ char excute_command();
 // Parameter: hijack call_back char(*hijack)(char*) return 0 for end
 //************************************
 void add_hijack(Arg_Tasks_def call_back);
-char cmd_help(void* a, void* b);
+int cmd_help(int a, char** b);
+
+int pass_cmd(int n, char** arg);
+
+int delete_field(int n, char** arg);
 
 void creat_public_a_cmd(char* name, Arg_Tasks_def link);
 void creat_public_a_field(char* name, void* link);
+int joint_args(int n, char** args);
+int shell_do_fields(char* cmd);
+int public_a_new_string_field(char* name, char* s);
+int public_a_new_field(char* name, char type, float val);
 #define public_a_cmd(name,link) creat_public_a_cmd((char*) name, (Arg_Tasks_def) link)
 //provide a name and a ref
 #define public_a_field(name,ref) creat_public_a_field((char*) name, ref)

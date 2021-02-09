@@ -19,7 +19,7 @@ int remove_timer(Tasks_def task);
 
 typedef struct
 {
-	List *timer_works, *peroids,*ticks;
+	Lily_List *timer_works, *peroids,*ticks;
 }Lily_timers;
 
 extern Lily_timers lily_timers;
