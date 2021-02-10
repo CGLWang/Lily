@@ -39,13 +39,13 @@ int main()
     addTask(sleep_task);
     char s[] = "help s";
     char* str = s;
-    cout << "ready";
+    cout << "type help to see doc";
     Li_List list = str_split(str,' ');
-    for (int i = 0; i < list->count; i++)
-    {
-        char* *s2 = (char**)list_index(list, i);
-        cout << i << ":" << *s2 << endl;
-    }
+    //for (int i = 0; i < list->count; i++)
+    //{
+    //    char* *s2 = (char**)list_index(list, i);
+    //    cout << i << ":" << *s2 << endl;
+    //}
     //addTask_(task4);
     Cmd_def cmd1;
     cmd1.annotation = (char*)"call exit";
