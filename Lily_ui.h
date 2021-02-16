@@ -2,14 +2,14 @@
 #include "Lily.h"
 #include "Lily_basic.h"
 
-typedef struct
-{
-	float* numbers;// numbers contained in a command string
-	char** paras;// option substrings in command
-	int numbers_length;//length of numbers
-	int paras_length;//length of options
-	char cmd_id;// this fields indicates which cmd was hit
-}Cmd_para_set_def;
+//typedef struct
+//{
+//	float* numbers;// numbers contained in a command string
+//	char** paras;// option substrings in command
+//	int numbers_length;//length of numbers
+//	int paras_length;//length of options
+//	char cmd_id;// this fields indicates which cmd was hit
+//}Cmd_para_set_def;
 /*
 * a cmd hit will receive parameters set with this type,
 * 
@@ -83,17 +83,6 @@ typedef Cmd_def* Cmd;
 #define stack_len 4
 typedef char (*hijack)(char*);
 
-#define Cmd_send 0x02
-#define Cmd_done 0x04
-#define Cmd_end 0x08
-#define Cmd_false 0x20
-
-//#define Cmd_send 1
-#define Cmd_not_send 0
-#define Cmd_false_input 0x20
-#define Cmd_send_done  0x04
-#define Cmd_send_done_and_end  0x04|0x08
-#define Cmd_send_and_end 0x02|0x08
 extern char rx[];
 extern unsigned char ri, hi;
 
@@ -102,11 +91,9 @@ extern unsigned char ti;
 extern Lily_cmds_def lily_ui;
 extern void (*deal_byte_stream)(char*);
 
-#define frame_head_0 '#'
-#define frame_head_1 '#'
 
-int shell_do();
-
+int excute_cmd();
+int shell_do_dep(char*);
 //************************************
 // Method:    add_hijack
 // FullName:  add_hijack
@@ -116,24 +103,35 @@ int shell_do();
 // Parameter: hijack call_back char(*hijack)(char*) return 0 for end
 //************************************
 void add_hijack(Arg_Tasks_def call_back);
+int search_cmd_in_Lily_ui(char* item);
+int search_field_in_Lily_ui(char* item);
 int cmd_help(int a, char** b);
 
 int pass_cmd(int n, char** arg);
 
 int delete_field(int n, char** arg);
 
-void creat_public_a_cmd(char* name, Arg_Tasks_def link);
-void creat_public_a_field(char* name, void* link);
+int whos(int n, char** arg);
+
+int system(int n, char** arg);
+
+void public_a_cmd_ref(char* name, Arg_Tasks_def link);
+void public_a_float_field_ref(char* name, void* link);
 int joint_args(int n, char** args);
-int shell_do_fields(char* cmd);
+int assign_field_from_field(Field dst, Field source);
+int assign_field_from_string(Field dst, char* val);
+int shell_do_fields_dep(char* cmd);
 int public_a_new_string_field(char* name, char* s);
 int public_a_new_field(char* name, char type, float val);
-#define public_a_cmd(name,link) creat_public_a_cmd((char*) name, (Arg_Tasks_def) link)
+#define public_a_cmd_link(name,link) public_a_cmd_ref((char*) name, (Arg_Tasks_def) link)
 //provide a name and a ref
-#define public_a_field(name,ref) creat_public_a_field((char*) name, ref)
+#define public_a_field_ref(name,ref) public_a_float_field_ref((char*) name, ref)
 
 //this will copy a backup
 #define public_cmd(new_cmd) list_add(lily_ui.cmds, &new_cmd)
 //new_field: type of Field_def, not ref
 #define public_field(new_field) list_add(lily_ui.fields, &new_field)
 
+//e.g.: Field fields = li_fields;
+#define li_fields ((Field)(lily_ui.fields->content));
+#define li_cmds (Cmd)(lily_ui.cmds->content);

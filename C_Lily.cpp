@@ -61,7 +61,7 @@ int main()
 	help.todo = task5;
 	public_cmd(help);*/
 
-    public_a_cmd("text", cmd_test1);
+    public_a_cmd_link("text", cmd_test1);
     public_a_timer(timer0, 30);
     public_a_timer(timer1, 10);
     deal_byte_stream = task6;
@@ -99,7 +99,6 @@ void task6(char* s)
         cout << "!";
     }
     cout << s;
-
 }
 int key_input_task()
 {
@@ -153,7 +152,7 @@ int cmd_test0(int arg,char**send_s)
  //   char** s = (char**)send_s;
  //   *(char**)send_s =(char*) "done----";
     
-    return Cmd_send;
+    return 0;
 }
 int task4()
 {
@@ -184,7 +183,7 @@ int cmd_test1(int arg, char** send_s)
 	//step = 1;
 	//cout << "frame cmd:" << str << endl;
 	//add_hijack(cmd_test1);
-	return Cmd_send_done;
+	return 0;
 }
 
 int timer0()

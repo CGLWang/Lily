@@ -15,6 +15,19 @@ char str_startwith(char* s, char* cmd)
 	return 1;
 }
 
+int str_contains(char* s, char c)
+{
+	for (int i = 0; s[i] != '\0'; i++)
+		if (s[i] == c)return 1;
+	return 0;
+}
+int str_contains_by_str(char* s, char* c)
+{
+	for (int i = 0; s[i] != '\0'; i++)
+		if(str_contains(c,s[i]))return 1;
+		//if (s[i] == c)return 1;
+	return 0;
+}
 
 char str_equal(char* s, char* cmd)
 {
@@ -82,8 +95,58 @@ char str_replace(char* s, char from, char to)
 
 	return times;
 }
+// '-123.45', '+13.890'
+int str_is_numeric(char* name)
+{
+	if (!isD(*name) && *name != '+'&& *name != '-')return 0;
+	if (!isD(*name))
+	{
+		name++;
+		if (*name == '\0')return 0;
+	}
+	else
+		name++;
 
-//in place
+	char lastIsDecimal = 0;
+	for(;*name != '\0';name++)
+	{
+		if (isD(*name))
+		{
+			lastIsDecimal = 0;
+			continue;
+		}
+		else if(*name=='.')
+		{
+			if (lastIsDecimal)return 0;
+			lastIsDecimal = 1;
+			continue;
+		}
+
+		return 0;
+	}
+	return 1;
+}
+// a, _ah_haha_, _label_text3
+int str_is_name(char* name)
+{
+	if (!isA(*name) && *name != '_')return 0;
+	if (*name == '_')
+	{
+		name++;
+		if (*name == '\0')return 0;
+	}else
+		name++;
+	
+
+	while (*name!='\0')
+	{
+		if (!isA(*name) && !isD(*name) && *name != '_')return 0;
+		name++;
+	}
+	return 1;
+}
+//in place operation, 
+// note: delete list returned in time
 Li_List str_split(char* str, char split_char)
 {
 	Li_List list = new_list(sizeof(char*), 4);
@@ -120,6 +183,75 @@ Li_List str_split(char* str, char split_char)
 	}
 	return list;
 }
+//in place operation, 
+// note: delete list returned in time
+Li_List str_split_by_str(char* str, char* split_char)
+{
+	Li_List list = new_list(sizeof(char*), 4);
+	if (*str == '\0')
+		return list;
+	char* last, * next;
+	char* now = str;
+	if(!str_contains(split_char, *now))
+	//if (*now != split_char)
+	{
+		list_add(list, &str);
+	}
+	last = now;
+	now++;
+	next = now;
+	while (*now != '\0')
+	{
+		if (str_contains(split_char, *last) && !str_contains(split_char, *now))
+		//if (*last == split_char && *now != split_char)
+		{
+			li_add(list, now);
+			/**last = '\0';*/
+		}
+		if (!str_contains(split_char, *last) && str_contains(split_char, *now))
+		//if (*last != split_char && *now == split_char)
+		{
+			*now = '\0';
+			last = split_char;
+			now++;// = next;
+			//next++;
+			continue;
+		}
+
+		last = now;
+		now++; //= next;
+		//next++;
+	}
+	return list;
+}
+// note: delete list returned in time
+// find indexs of chars in find in string s
+//e.g. str_find("1+2*3/4", "+-*/")
+// return [1,3,5]
+Li_List str_find(char* s, char* find)
+{
+	Li_List list = new_list(sizeof(int), 4);
+	if (list == NULL)return list;
+	for(int i = 0; s[i]!='\0';i++)
+	{
+		if (str_contains(find, s[i]))
+			li_add(list, i);
+	}
+	return list;
+}
+Li_List str_find_sort(char* s, char* find)
+{
+	Li_List list = new_list(sizeof(int), 4);
+	if (list == NULL)return list;
+	for (int i = 0; find[i] != '\0'; i++)
+	{
+		for(int j=0;s[j]!='\0';j++)
+			if(s[j]==find[i])
+				li_add(list, j);
+	}
+	return list;
+}
+
 // add the num to a string
 // return: length of num
 char int_to_string(int n, char* s)
@@ -151,6 +283,7 @@ char int_to_string(int n, char* s)
 		s[j] = s[i - j - 1];
 		s[i - j - 1] = a;
 	}
+	s[i + add] = '\0';
 	return i + add;
 }
 

@@ -5,6 +5,7 @@
 #include "Lily_tasks.h"
 #include "Lily_ui.h"
 #include "Lily_boardcast.h"
+#include "shell_cal.h"
 typedef unsigned char byte;
 
 byte sum_check = 0;
@@ -21,7 +22,7 @@ byte sum_check = 0;
 int r_count = 0;
 void lily_cin(char c)
 {
-	static byte head[2] = { frame_head_0,frame_head_1 };
+	//static byte head[2] = { frame_head_0,frame_head_1 };
 	static byte step = 0, length = 0;
 	static bool in_frame = false;
 	
@@ -70,7 +71,7 @@ void lily_cin(char c)
 	if (c == ';' || c == '\n')
 		c = '\0';
 	if (c == '\0')
-		addTask_(shell_do);
+		addTask_(excute_cmd);
 	//}
 	
 	rx[ri++] = c;
@@ -122,8 +123,25 @@ void lily_init()
 	pass.id = 2;
 	public_cmd(pass);
 
+	pass.name = (char*)"whos";
+	pass.annotation = (char*)"[fields]:list fields";
+	pass.todo = whos;
+	pass.id = 3;
+	public_cmd(pass);
+	
+	pass.name = (char*)"sys";
+	pass.annotation = (char*)":system info";
+	pass.todo = system;
+	pass.id = 4;
+	public_cmd(pass);
 
-	public_a_field("test_field", &test_fields);
+	pass.name = (char*)"cal";
+	pass.annotation = (char*)"[exp]:caculate expression";
+	pass.todo = shell_cal_exp_cmd;
+	pass.id = 5;
+	public_cmd(pass);
+
+	public_a_field_ref("test_field", &test_fields);
 	Field_def fed = { (char*)"rcount",(char*)"_received key count",(float*)&r_count,'d' };
 	public_field(fed);
 	public_a_new_string_field((char*)"sf2",(char*) "_test string");

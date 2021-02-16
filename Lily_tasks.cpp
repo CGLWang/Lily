@@ -168,13 +168,14 @@ void run_tasks()
 			}
 		}
 		
-		i = rear;
+		i = rear;//tasks2
 		while (front != i)
 		{
 			if (tasks_[front] == NULL)
 			{
 				lily_cout("null ptr");
-				front++;
+				if (++front >= Tasks_LEN)
+					front = 0;
 				continue;
 			}
 			if (tasks_[front]()>0)

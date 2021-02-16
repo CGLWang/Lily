@@ -33,6 +33,9 @@
     <ClCompile Include="Lily_ui.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="shell_cal.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lily.h">
@@ -48,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Lily_ui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shell_cal.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

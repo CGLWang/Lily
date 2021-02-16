@@ -1,9 +1,16 @@
 #pragma once
+#define isA(c) ('a'<=c&&c<='z')
+#define isD(c) ('0'<=c&&c<='9')
+
 char str_startwith(char* s, char* cmd);
+int str_contains(char* s, char c);
+int str_contains_by_str(char* s, char* c);
 char str_equal(char* s, char* cmd);
 int str_index(char* s, char c);
 char str_lower(char* str);
 char str_replace(char* s, char from, char to);
+int str_is_numeric(char* name);
+int str_is_name(char* name);
 char int_to_string(int n, char* s);
 
 float* get_nums_from_rx(char* rs, int* length_back);
@@ -29,8 +36,22 @@ typedef Li_String_def* Li_String;
 
 Li_List str_split(char* str, char split_char);
 
+Li_List str_split_by_str(char* str, char* split_char);
+
+Li_List str_find(char* s, char* find);
+
+Li_List str_find_sort(char* s, char* find);
+
 #define list_index(list,i) (list->content+i*list->type_size)
-#define li_add(list,obj) (list_add(list,&obj))
+//e.g.: Li_list list = new_li(int);
+#define new_li(type) new_list(sizeof(type),4)
+//e.g.: Li_list list = new_li_cap(int,8);
+#define new_li_cap(type,cap) new_list(sizeof(type),cap)
+//e.g.: int index = li_add(list,item);
+#define li_add(list,obj) (list_add(list,&(obj)))
+//e.g.: string* strs = list_content(list, string);
+#define list_content(list,type) (type*)(list->content)
+
 
 #define List_normal_code 0
 #define List_no_space 1
