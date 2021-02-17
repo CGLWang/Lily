@@ -5,7 +5,7 @@
 char str_startwith(char* s, char* cmd);
 int str_contains(char* s, char c);
 int str_contains_by_str(char* s, char* c);
-char str_equal(char* s, char* cmd);
+char str_equal(const char* s,const char* cmd);
 int str_index(char* s, char c);
 char str_lower(char* str);
 char str_replace(char* s, char from, char to);
@@ -70,6 +70,8 @@ int list_find(Lily_List* list, void* item);
 int delete_list(Lily_List* list);
 
 Li_String new_li_string_by(char* str);
+
+char* new_string_by(char* str);
 
 void delete_li_string(Li_String li);
 

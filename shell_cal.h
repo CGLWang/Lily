@@ -15,3 +15,11 @@ int shell_do_cal(char* rx);
 int shell_do_fields(char* rx);
 
 int shell_do_notFound(char* rx);
+int assign_field_from_field(Field dst, Field source);
+int assign_field_from_string(Field dst, char* val);
+
+
+void field_to_string(char* tx, Field fed);
+
+int assign_string_field(Field fed, const char* val);
+

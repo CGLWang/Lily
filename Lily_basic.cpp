@@ -29,7 +29,7 @@ int str_contains_by_str(char* s, char* c)
 	return 0;
 }
 
-char str_equal(char* s, char* cmd)
+char str_equal(const char* s, const char* cmd)
 {
 	if (s[0] == '\0') return 0;
 
@@ -540,7 +540,9 @@ int delete_list(Lily_List* list)
 }
 
 
-Li_String new_li_string_by(char* str)
+//depracted 
+// use new_string_by to creat sample string field
+Li_String new_li_tring_by(char* str)
 {
 	Li_String li_string = (Li_String)malloc(sizeof(Li_String_def));
 	if (li_string == NULL)return NULL;
@@ -556,6 +558,15 @@ Li_String new_li_string_by(char* str)
 	li_string->length = n;
 	return li_string;
 }
+char* new_string_by(char* str)
+{
+	int n = strlen(str) + 1;
+	void *p = malloc(n);
+	if (p == NULL)return NULL;
+	strcpy((char*)p, str);
+	return (char*)p;
+}
+
 void delete_li_string(Li_String li)
 {
 	free(li->str);
@@ -577,3 +588,4 @@ int assign_li_string(Li_String li, char* source)
 	li->length = n;
 	return n;
 }
+

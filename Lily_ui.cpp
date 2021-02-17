@@ -7,13 +7,12 @@ unsigned char ri, hi;
 char tx[64];
 unsigned char ti;
 
-char clip_board[128];
+//char clip_board[128];
 
 Lily_cmds_def lily_ui;//a value is copied, so a cmd or field can be add in a stack call
 
 static Arg_Tasks_def ui_stack[4];
 static char stack_top = 0;
-void (*deal_byte_stream)(char*) = NULL;
 // this fun also change the hi index
 // assert that the cmd is less than 31b in length
 char* get_cmd_from_rx()
@@ -74,30 +73,13 @@ char* get_cmd_from_rx()
 //
 //}
 
-// depracted
 int excute_cmd()
 {
-	//char i;
-	//int hit = 0;
 	char* rx = get_cmd_from_rx();
-	//if (*rx == frame_head_0)
-	//{
-	//	if (deal_byte_stream != NULL)
-	//		deal_byte_stream(rx);
-	//	/*return end;*/
-	//}
-	//char* send_s = tx;
-	//static Cmd_para_set_def para_set;
-	//int num_length = 0;
-	//float* nums = NULL;
-	//bool need_send = false;
-	//char return_code;
 
-	while (*rx==' ')
-	{
-		rx++;
-	}
+	while (*rx==' ')rx++;
 	if (*rx == '\0')return -1;
+	// haijcked ?
 	if (stack_top)
 	{
 		Li_List list = str_split(rx, ' ');
@@ -124,168 +106,7 @@ int excute_cmd()
 	if (code < 0)
 	{
 		sprintf(tx, "error(%d)\n", code);
-	}
-	return 0;
-//	if (stack_top)
-//	{
-//		hit = 1;
-//		
-//		Li_List list = str_split(rx, ' ');
-//		return_code = ui_stack[stack_top](list->count,(char**)(list->content));
-//		//if (assign_send_s(return_code, &send_s, &need_send))
-//		//	stack_top--;
-//		if (return_code==0)
-//			stack_top--;
-//
-//		if (!stack_top)
-//		{
-//			lily_ui.hijacked = false;
-//		}
-//	}
-//
-//	if (!hit)
-//	{
-//		for (i = 0; i < lily_ui.cmds->count; i++)//cmds
-//		{
-//			Cmd_def* cmd = (Cmd_def*)list_index(lily_ui.cmds, i);
-//			hit = str_equal(rx, cmd->name);
-//			if (hit)
-//			{
-//				/*void* arg = &para_set;
-//				para_set.cmd_id = cmd->id;
-//				switch (cmd->type)
-//				{
-//				case with_bytes:
-//					arg = rx+hit;
-//					break;
-//				case with_numbers:
-//					para_set.numbers = get_nums_from_rx(rx+hit, &(para_set.numbers_length));
-//					hijacked = true;
-//					break;
-//				case with_paras:
-//					para_set.paras = get_paras_from_rx(rx+hit, &(para_set.paras_length));
-//					break;
-//				case with_both:
-//					para_set.numbers = get_nums_from_rx(rx+hit, &(para_set.numbers_length));
-//					hijacked = true;
-//					para_set.paras = get_paras_from_rx(rx+hit, &(para_set.paras_length));
-//					break;
-//				default:
-//					break;
-//				}*/
-//				Li_List list = str_split(rx, ' ');
-//				return_code = (cmd->todo)(list->count, (char**)(list->content));
-//				if (return_code < 0)
-//					lily_cout("error\n");
-//				/*switch (return_code)
-//				{
-//				case Cmd_send:
-//					need_send = true;
-//					break;
-//				case Cmd_false_input:
-//					send_s = (char*)"false input!";
-//					need_send = true;
-//				case Cmd_send_done:case Cmd_send_done_and_end:
-//					send_s = (char*)"done";
-//					need_send = true;
-//				default:
-//					break;
-//				}*/
-//				break;
-//			}
-//		}
-//	}
-//
-//	if (!hit)
-//	{
-//		hit = shell_do_fields(rx) >= 0;
-//		
-//		//for (i = 0; i < lily_ui.fields->count; i++)
-//		//{
-//		//	Field_def* field = (Field_def*)list_index(lily_ui.fields, i);
-//		//	hit = str_equal(rx, field->name);
-//		//	if (hit)
-//		//	{
-//		//		
-//		//		//nums = get_nums_from_rx(rx + hit, &num_length);
-//		//		//if (num_length == 1)
-//		//		//	*((float*)field->ref) = nums[0];
-//		//		//strcpy(rx, field->name);
-//		//		//switch (field->type)
-//		//		//{
-//		//		//case float_type:
-//		//		//	strcat(rx, "=%f");
-//		//		//	sprintf(tx, rx, *(field->ref));
-//		//		//	break;
-//		//		//case int_type:
-//		//		//	strcat(rx, "=%d");
-//		//		//	sprintf(tx, rx, *((int*)(field->ref)));
-//		//		//	break;
-//		//		//default:
-//		//		//	break;
-//		//		//}
-//		//		//need_send = True;
-//		//		break;
-//		//	}
-//		//}
-//	}
-//	
-//	if (!hit)
-//	{
-//		strcpy(tx, "no cmd:\"");
-//		strcat(tx, rx);
-//		strcat(tx, "\"");
-//		send_s = tx;
-//		need_send = 1;
-//	}
-//	if (need_send)
-//	{
-//		if (send_s != NULL)
-//		{
-//			/*if (!hijacked)*/
-//				lily_cout(">>");
-//				/*else
-//					lily_cout(">");*/
-//			lily_cout(send_s);
-//			lily_cout("\n");
-//		}
-//#ifdef in_debug
-//		else
-//			lily_cout("NULL ptr exception!\n");
-//#endif // in_debug
-//	}
-//	return 0;
-}
-
-
-int shell_do_dep(char*rx)
-{
-	int hit = 0;
-	char return_code;
-	hit = search_cmd_in_Lily_ui(rx);
-	if (hit >= 0)
-	{
-		Cmd_def* cmd = (Cmd_def*)list_index(lily_ui.cmds, hit);
-		Li_List list = str_split(rx, ' ');
-		return_code = (cmd->todo)(list->count, (char**)(list->content));
-		delete_list(list);
-		if (return_code < 0)
-		{
-			sprintf(tx, "error(%d)\n", return_code);
-			lily_cout(tx);
-		}
-			//lily_cout("error\n");
-		return 0;
-	}
-
-	hit = shell_do_fields(rx);
-	if (hit >= 0)return 0;
-
-	if (hit<0)
-	{
-		lily_cout("no cmd:\"");
-		lily_cout(rx);
-		lily_cout("\"\n");
+		lily_cout(tx);
 	}
 	return 0;
 }
@@ -326,30 +147,51 @@ int search_field_in_Lily_ui(char* item)
 	}
 	return -1;
 }
-int cmd_help(int nargin, char** arg)
+
+int help(int nargin, char** arg)
 {
 	//lily_cout(">>help:\n");
-	Cmd_def* p = (Cmd_def*)(lily_ui.cmds->content);
+	Cmd p = li_cmds;
 	bool hit = false;
 	for(int now = 1;now<nargin;now++)
 	{
 		hit = false;
 		char* item = NULL;
 		item = arg[now];
-		int n = lily_ui.cmds->count;
-		for (int i = 0; i < n; i++)
+		int index = search_cmd_in_Lily_ui(item);
+		if (index >= 0)
 		{
-			if (str_equal(item, p[i].name))
-			{
-				sprintf(tx, ">>%s: id:%d, %s\n", p[i].name,p[i].id, p[i].annotation);
-				lily_cout(tx);
-				hit = true;
-				break;
-			}
+			sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
+			lily_cout(tx);
+			continue;
 		}
-		if(hit)continue;
-		Field_def* q = (Field_def*)(lily_ui.fields->content);
-		n = lily_ui.fields->count;
+		//int n = lily_ui.cmds->count;
+		//for (int i = 0; i < n; i++)
+		//{
+		//	if (str_equal(item, p[i].name))
+		//	{
+		//		sprintf(tx, ">>%s: id:%d, %s\n", p[i].name,p[i].id, p[i].annotation);
+		//		lily_cout(tx);
+		//		hit = true;
+		//		break;
+		//	}
+		//}
+		//if(hit)continue;
+		Field q = li_fields;// (Field_def*)(lily_ui.fields->content);
+		index = search_field_in_Lily_ui(item);
+		if (index >= 0)
+		{
+			char s[] = "f";
+			sprintf(tx, ">>%s:%s, type:", q[index].name, q[index].annotation);
+			lily_cout(tx);
+			s[0] = q[index].type;
+			lily_cout(s);
+			lily_cout("\n");
+			//sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
+			//lily_cout(tx);
+			continue;
+		}
+		/*n = lily_ui.fields->count;
 		for (int i = 0; i < n; i++)
 		{
 			if (str_equal(item, q[i].name))
@@ -363,8 +205,8 @@ int cmd_help(int nargin, char** arg)
 				hit = true;
 				break;
 			}
-		}
-		if(hit)continue;
+		}*/
+		//if(hit)continue;
 		lily_cout(">>not found help of:");
 		lily_cout(item);
 		lily_cout("\n");
@@ -389,7 +231,7 @@ int cmd_help(int nargin, char** arg)
 	return 0;
 }
 
-int pass_cmd(int n, char** arg)
+int pass(int n, char** arg)
 {
 	int nn=1;
 	if (n > 1)
@@ -424,10 +266,15 @@ int delete_field(int n, char** arg)
 			return -1;
 		}
 		Field_def* q = (Field_def*)(lily_ui.fields->content);
-		if (q[index].annotation[0] != '_')
-			free(q[index].name);
-		if (q[index].type == 's')
-			delete_li_string((Li_String)(q[index].ref));
+		if (q[index].annotation[0] == '_')
+			return -3;//protected
+		free(q[index].name);
+		free(q[index].ref);
+		//if (q[index].annotation[0] != '_')
+		//	free(q[index].name);
+		//if (q[index].type == 's')
+			//delete_li_string((Li_String)(q[index].ref));
+
 		list_remove_at(lily_ui.fields, index);
 	}
 	lily_cout("done\n");
@@ -477,6 +324,9 @@ int whos(int nargin, char** arg)
 		switch (q[i].type)
 		{
 		case 's':
+			sprintf(tx, "%s\n", ((char*)(q[i].ref)));
+			break;
+		case 'S':
 			sprintf(tx, "%s\n", ((Li_String)q[i].ref)->str);
 			break;
 		case 'f':
@@ -507,10 +357,10 @@ int system(int n, char** arg)
 }
 //creat and public a cmd with defaults
 //just provide a name and fun ptr of this cmd
-void public_a_cmd_ref(char* name, Arg_Tasks_def link)
+void public_a_cmd_link(const char* name, Arg_Tasks_def link)
 {	
 	Cmd_def cmd;
-	cmd.name = name;
+	cmd.name = (char*)name;
 	cmd.annotation = (char*)"none";
 	cmd.todo = link;
 	cmd.id = lily_ui.cmds->count;
@@ -518,13 +368,13 @@ void public_a_cmd_ref(char* name, Arg_Tasks_def link)
 }
 //creat and public a cmd with defaults
 // note:
-// no extra memory, save nothing
-//e.g.: 
-void public_a_float_field_ref(char* name, void*link)
+// no extra memory, save nothing, used in built in var
+//e.g.: public_a_field_ref("test_field", &test_fields);
+void public_a_field_ref(const char* name, void*link)
 {
 	Field_def fed;
-	fed.name = name;
-	fed.annotation =(char*) "_none";
+	fed.name = (char*)name;
+	fed.annotation =(char*) "_builtIn";// strats with '_' means this field is protected
 	fed.ref = link;
 	fed.type = 'f';
 	public_field(fed);
@@ -545,248 +395,8 @@ int joint_args(int n,char** args)
 	}
 	return len;
 }
-int assign_field_from_field(Field dst, Field source)
-{
-	if (dst->type == 's')//dst type is string
-	{
-		if (source->type == 's')// s->s
-		{
-			return assign_li_string((Li_String)(dst->ref), ((Li_String)(source->ref))->str);
-		}
-		// n-> s
-		delete_li_string((Li_String)(dst->ref));
-		dst->type = source->type;
-		dst->ref = malloc(sizeof(float));
-		memcpy(dst->ref, source->ref, sizeof(float));
-		return 0;
-	}
-	// dst type is numeric
-	//s -> n
-	if (source->type == 's') 
-	{
-		if ((dst->annotation)[0] == '_')
-		{
-			return -1;
-		}
-		free(dst->ref);
-		dst->ref = new_li_string_by(((Li_String)(source->ref))->str);
-		dst->type = source->type;
-		return 0;
-	}
-	//n -> n
-	dst->type = source->type;
-	memcpy(dst->ref, source->ref, sizeof(float));
-	return 0;
 
-}
-int assign_field_from_string(Field dst, char* val)
-{
-	float val_f;
-	int val_i;
-	switch (dst->type)
-	{
-	case 's':
-		return assign_li_string((Li_String)(dst->ref), val);
-		break;
-	case 'd':
-		val_i = atoi(val);
-		*(int*)(dst->ref) = val_i;
-		break;
-	case 'f':
-		val_f = atof(val);
-		*(float*)(dst->ref) = val_f;
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
-int shell_do_fields_dep(char* cmd)
-{
-	//joint_args(n, arg);
-	//if (str_contains_by_str(cmd, (char*)"+-*/"))
-	//{
-	//	int code = shell_cal_assitant(1, &cmd);
-	//	return code;
-	//}
-	int index = str_index(cmd, '=');
-	str_replace(cmd, '=', ' ');
-	Li_List li = str_split(cmd, ' ');
-	int n = li->count;
-	char** args = (char**)li->content;
-	char* val=NULL;
-	if (index > 0)
-	{
-		val = args[1];
-	}
-	index = search_field_in_Lily_ui(args[0]);
-	
-	if (index < 0 && val == NULL)
-	{
-		delete_list(li);
-		return -1;
-	}
-
-	Field fields = (Field)(lily_ui.fields->content);
-	Field first_field=NULL, sencond_field=NULL;
-	if(index>=0)
-		first_field = &(fields[index]);
-	
-	char pattern[] = "=%f\n";
-	int code = 0;
- 	if (val != NULL)
-	{
-		index = search_field_in_Lily_ui(val);
-		if (index >= 0)
-		{
-			sencond_field = &fields[index];
-		}
-	}
-	
-
-	if (first_field == NULL && val!=NULL)
-	{
-		if (sencond_field != NULL) // creat a new field and overwrite
-		{
-			switch (sencond_field->type)
-			{
-			case 's':
-				code = public_a_new_string_field(cmd, ((Li_String)sencond_field->ref)->str);
-				break;
-			case 'f': 
-				code = public_a_new_field(cmd, sencond_field->type, *((float*)(sencond_field->ref)));
-				break;
-			case 'd':
-				code = public_a_new_field(cmd, sencond_field->type, *((int*)(sencond_field->ref)));
-				break;
-			default:
-				break;
-			}
-		}
-		else
-		{
-			int num_length = 0;
-			float* nums = NULL;
-
-			nums = get_nums_from_rx(val, &num_length);
-			if (num_length > 0)
-			{
-				code = public_a_new_field(cmd, 'f', nums[0]);
-			}
-			else
-				code = public_a_new_string_field(cmd, val);
-		}
-
-		if (code < 0)
-		{
-			//lily_cout("error\n");
-			sprintf(tx, "error(%d)\n", code);
-			lily_cout(tx);
-			delete_list(li);
-			return 0;
-		}
-		else
-		{
-			first_field = &fields[code];
-		}
-	}
-	else if(first_field != NULL && val!=NULL)  //reassign a field
-	{
-		if (sencond_field != NULL)
-		{
-			code = assign_field_from_field(first_field, sencond_field);
-		}
-		else
-		{
-			code = assign_field_from_string(first_field, val);
-		}
-		if (code < 0)
-		{
-			lily_cout("error\n");
-			return 0;
-		}
-		/*if (type == 's')
-		{
-			if (assign_li_string((Li_String)(first_field->ref), val) < 0)
-			{
-				lily_cout("error, too long\n");
-			}
-			else
-			{
-				lily_ui.para_updated = true;
-			}
-		}
-		else
-		{
-			int num_length = 0;
-			float* nums = NULL;
-
-			nums = get_nums_from_rx(val, &num_length);
-			if (num_length == 1)
-			{
-				switch (first_field->type)
-				{
-				case 'f':
-					*(float*)(first_field->ref) = nums[0];
-					break;
-				case 'd':
-					*(int*)(first_field->ref) = (int)(nums[0]);
-					break;
-				default:
-					break;
-				}
-				lily_ui.para_updated = true;
-			}
-		}	*/
-	}
-	//else if(val!=NULL) // index <0 and val is not Null
-	//{
-	//	int num_length = 0;
-	//	float* nums = NULL;
-
-	//	nums = get_nums_from_rx(val, &num_length);
-	//	if (num_length > 0)
-	//	{
-	//		code = public_a_new_field(cmd, 'f', nums[0]);
-	//	}
-	//	else
-	//		code = public_a_new_string_field(cmd, val);
-	//	if (code < 0)
-	//	{
-	//		lily_cout("error\n");
-	//		return 0;
-	//	}
-	//	else
-	//	{
-	//		first_field = &fields[lily_ui.fields->count - 1];
-	//	}
-	//	//lily_cout("done\n");
-	//	//return 0;
-	//}
-		
-	//show
-	pattern[2] = first_field->type;
-	lily_cout(first_field->name);
-	switch (first_field->type)
-	{
-	case 'f':
-		sprintf(tx, pattern, *(float*)(first_field->ref));
-		break;
-	case 'd':
-		sprintf(tx, pattern, *(int*)(first_field->ref));
-		break;
-	case 's':
-		sprintf(tx, pattern, *(char**)(first_field->ref));
-		break;
-	default:
-		lily_cout("type error");
-		break;
-	}
-	lily_cout(tx);
-	delete_list(li);
-	return 0;
-}
-
+// creat a new li_string to save [s]
 int public_a_new_string_field(char*name, char* s)
 {
 	Field_def fed;
@@ -794,9 +404,11 @@ int public_a_new_string_field(char*name, char* s)
 	fed.name =(char*) malloc(strlen(name) + 1);
 	if (fed.name == NULL)return -1;
 	strcpy(fed.name, name);
-	Li_String li = new_li_string_by(s);
-	if (li == NULL)return -1;
-	fed.ref = li;
+	//Li_String li = new_li_string_by(s);
+	//if (li == NULL)return -1;
+	void* p = new_string_by(s);
+	if (p == NULL)return -2;
+	fed.ref = p;
 	fed.type = 's';
 	return public_field(fed);
 }

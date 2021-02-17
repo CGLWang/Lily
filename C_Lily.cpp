@@ -64,7 +64,7 @@ int main()
     public_a_cmd_link("text", cmd_test1);
     public_a_timer(timer0, 30);
     public_a_timer(timer1, 10);
-    deal_byte_stream = task6;
+    //deal_byte_stream = task6;
     
     char buff[128];
 	/* char* p = (char*)"##9123456789nop\n";

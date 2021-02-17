@@ -103,48 +103,54 @@ void lily_init()
 		lily_cout("lily init failed!");
 		return;
 	}
-	Cmd_def help;
-	help.name = (char*)"help";
-	help.annotation = (char*)"help [cmd1] [field1]... :to see all cmd and fields";
-	help.todo = cmd_help;
-	help.id = 0;
-	public_cmd(help);
+	Cmd_def new_cmd;
+	new_cmd.name = (char*)"help";
+	new_cmd.annotation = (char*)"help [cmd1]:info of cmd and fields";
+	new_cmd.todo = help;
+	new_cmd.id = 0;
+	public_cmd(new_cmd);
 
-	Cmd_def pass;
-	pass.name = (char*)"pass";
-	pass.annotation = (char*)"pass [n]: to skip a cmd in queue or more than one cmds";
-	pass.todo = pass_cmd;
-	pass.id = 1;
-	public_cmd(pass);
+	//Cmd_def new_cmd;
+	new_cmd.name = (char*)"pass";
+	new_cmd.annotation = (char*)"pass [n]:skip cmds";
+	new_cmd.todo = pass;
+	new_cmd.id = 1;
+	public_cmd(new_cmd);
 
-	pass.name = (char*)"delete";
-	pass.annotation = (char*)"delete field...: to delete a field or more";
-	pass.todo = delete_field;
-	pass.id = 2;
-	public_cmd(pass);
+	new_cmd.name = (char*)"delete";
+	new_cmd.annotation = (char*)"delete field";
+	new_cmd.todo = delete_field;
+	new_cmd.id = 2;
+	public_cmd(new_cmd);
 
-	pass.name = (char*)"whos";
-	pass.annotation = (char*)"[fields]:list fields";
-	pass.todo = whos;
-	pass.id = 3;
-	public_cmd(pass);
+	new_cmd.name = (char*)"whos";
+	new_cmd.annotation = (char*)"[fields]:list fields";
+	new_cmd.todo = whos;
+	new_cmd.id = 3;
+	public_cmd(new_cmd);
 	
-	pass.name = (char*)"sys";
-	pass.annotation = (char*)":system info";
-	pass.todo = system;
-	pass.id = 4;
-	public_cmd(pass);
+	new_cmd.name = (char*)"sys";
+	new_cmd.annotation = (char*)":system info";
+	new_cmd.todo = system;
+	new_cmd.id = 4;
+	public_cmd(new_cmd);
 
-	pass.name = (char*)"cal";
-	pass.annotation = (char*)"[exp]:caculate expression";
-	pass.todo = shell_cal_exp_cmd;
-	pass.id = 5;
-	public_cmd(pass);
+	new_cmd.name = (char*)"cal";
+	new_cmd.annotation = (char*)"[exp]:caculate expression";
+	new_cmd.todo = shell_cal_exp_cmd;
+	new_cmd.id = 5;
+	public_cmd(new_cmd);
 
 	public_a_field_ref("test_field", &test_fields);
-	Field_def fed = { (char*)"rcount",(char*)"_received key count",(float*)&r_count,'d' };
+	Field_def fed = { (char*)"rcount",(char*)"_rxCount",(float*)&r_count,'d' };
 	public_field(fed);
-	public_a_new_string_field((char*)"sf2",(char*) "_test string");
+	fed.name = (char*)"tx";
+	fed.annotation = "_builtIn";
+	fed.type = 's';
+	fed.ref = tx;
+	public_field(fed);
+	//public_field(fed);
+	public_a_new_string_field((char*)"sf2",(char*) "test");
 	//timer
 	lily_timers.timer_works = new_list(sizeof(Tasks_def), 4);
 	lily_timers.peroids = new_list(sizeof(unsigned int), 4);

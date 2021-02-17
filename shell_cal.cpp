@@ -221,16 +221,16 @@ int shell_cal_exp_cmd(int n, char** arg)
 	}
 	else if (n == 3)
 	{
+		result = shell_calculate_expression(arg[2]);
+		if (isnan(result))return -3;
+
 		int index = search_field_in_Lily_ui(arg[1]);
 		if (index < 0)
 		{
 			index = public_a_new_field(arg[1],'f', 0.0f);
-			//return -2;
 		}
 		Field fields = li_fields;
 		Field field = &fields[index];
-		result = shell_calculate_expression(arg[2]);
-		if (isnan(result))return -3;
 
 		if (field->type == 'f')
 		{
@@ -285,12 +285,33 @@ int shell_do_cmd(char* rx)
 
 	Cmd_def* cmd = (Cmd_def*)list_index(lily_ui.cmds, hit);
 	Li_List list = str_split(rx, ' ');
+	hit = list->count;
+	string_* para = (char**)(list->content);
+	for (int i = 0; i < hit; i++)
+	{
+		if (para[i][0] != '$')continue;
+		//replace para[i] to the field content
+		int index = search_field_in_Lily_ui(para[i] + 1);
+		if (index < 0)
+		{
+			delete_list(list);
+			return -1;// index out
+		}
+		Field fields = li_fields;
+		Field field = fields+index;
+		if (field->type != 's')
+		{
+			delete_list(list);
+			return -2;//type error
+		}
+		//para[i] = ((Li_String)field->ref)->str;
+		para[i] = (char*)field->ref;
+
+	}
 	return_code = (cmd->todo)(list->count, (char**)(list->content));
 	delete_list(list);
 	if (return_code < 0)
 	{
-		//sprintf(tx, "error(%d)\n", return_code);
-		//lily_cout(tx);
 		return return_code;
 	}
 	return 1;
@@ -322,21 +343,29 @@ int shell_do_cal(char* rx)
 // a, if a is a field
 int shell_do_fields(char* rx)
 {
-	strcpy(tx, rx);
-	char* cmd = tx;
+	//strcpy(tx, rx);
+	char* cmd = rx;
 	int index = str_index(cmd, '=');
 	str_replace(cmd, '=', ' ');
+	// split maxmmun two string: a = b
 	Li_List li = str_split(cmd, ' ');
 	int n = li->count;
+	if (n>2)// contains too many '='
+	{
+		delete_list(li);
+		return -3;
+	}
+
 	char** args = (char**)li->content;
 	char* val = NULL;
-	if (index > 0)
+
+	if (index > 0)// contsins '=', assign operation
 	{
 		val = args[1];
 	}
 	index = search_field_in_Lily_ui(args[0]);
 
-	if (index < 0 && val == NULL)
+	if (index < 0 && val == NULL) // hit miss
 	{
 		delete_list(li);
 		return 0;
@@ -347,9 +376,9 @@ int shell_do_fields(char* rx)
 	if (index >= 0)
 		first_field = &(fields[index]);
 
-	char pattern[] = "=%f\n";
+	//char pattern[] = "=%f\n";
 	int code = 0;
-	if (val != NULL)
+	if (val != NULL)// '='
 	{
 		index = search_field_in_Lily_ui(val);
 		if (index >= 0)
@@ -358,15 +387,15 @@ int shell_do_fields(char* rx)
 		}
 	}
 
-
-	if (first_field == NULL && val != NULL)
+	// creat new Field
+	if (first_field == NULL && val != NULL)// e.g.: newField = a
 	{
-		if (sencond_field != NULL) // creat a new field and overwrite
+		if (sencond_field != NULL) // creat a new field and overwrite,e.g.: newField = oldFiled
 		{
 			switch (sencond_field->type)
 			{
 			case 's':
-				code = public_a_new_string_field(cmd, ((Li_String)sencond_field->ref)->str);
+				code = public_a_new_string_field(cmd, (char*)(sencond_field->ref));
 				break;
 			case 'f':
 				code = public_a_new_field(cmd, sencond_field->type, *((float*)(sencond_field->ref)));
@@ -378,18 +407,17 @@ int shell_do_fields(char* rx)
 				break;
 			}
 		}
-		else
+		else//e.g.: newField = 123
 		{
-			int num_length = 0;
-			float* nums = NULL;
-
-			nums = get_nums_from_rx(val, &num_length);
-			if (num_length > 0)
+			if (str_is_numeric(val))
 			{
-				code = public_a_new_field(cmd, 'f', nums[0]);
+				float num = atof(val);
+				code =  public_a_new_field(cmd, 'f', num);
 			}
 			else
-				code = public_a_new_string_field(cmd, val);
+			{
+				code =  public_a_new_string_field(cmd, val);
+			}
 		}
 
 		if (code < 0)
@@ -404,39 +432,43 @@ int shell_do_fields(char* rx)
 	}
 	else if (first_field != NULL && val != NULL)  //reassign a field
 	{
-		if (sencond_field != NULL)
+		if (sencond_field != NULL)// e.g.: f1 = f2
 		{
 			code = assign_field_from_field(first_field, sencond_field);
 		}
-		else
+		else// e.g.: f1 = 123
 		{
 			code = assign_field_from_string(first_field, val);
 		}
 		if (code < 0)
 		{
+			delete_list(li);
 			return code;
 		}
 	}
 	
 	//show
-	pattern[2] = first_field->type;
+	//pattern[2] = first_field->type;
 	lily_cout(first_field->name);
-	switch (first_field->type)
-	{
-	case 'f':
-		sprintf(tx, pattern, *(float*)(first_field->ref));
-		break;
-	case 'd':
-		sprintf(tx, pattern, *(int*)(first_field->ref));
-		break;
-	case 's':
-		sprintf(tx, pattern, *(char**)(first_field->ref));
-		break;
-	default:
-		lily_cout("type error");
-		break;
-	}
+	//switch (first_field->type)
+	//{
+	//case 'f':
+	//	sprintf(tx, pattern, *(float*)(first_field->ref));
+	//	break;
+	//case 'd':
+	//	sprintf(tx, pattern, *(int*)(first_field->ref));
+	//	break;
+	//case 's':
+	//	sprintf(tx, pattern, *(char**)(first_field->ref));
+	//	break;
+	//default:
+	//	lily_cout("type error");
+	//	break;
+	//}
+	tx[0] = '=';
+	field_to_string(tx+1, first_field);
 	lily_cout(tx);
+	lily_cout("\n");
 	delete_list(li);
 	return 1;
 }
@@ -448,3 +480,125 @@ int shell_do_notFound(char* rx)
 	return 1;
 }
 
+int assign_field_from_field(Field dst, Field source)
+{
+	if (dst->type == 's')//dst type is string
+	{
+		if (source->type == 's')// s->s
+		{
+			//return assign_li_string((Li_String)(dst->ref), ((Li_String)(source->ref))->str);
+			return assign_string_field(dst, (char*)(source->ref));
+		}
+		// n-> s
+		//delete_li_string((Li_String)(dst->ref));
+		free(dst->ref);
+		dst->type = source->type;
+		dst->ref = malloc(sizeof(float));// note 4 byte[float and int] is ok there
+		memcpy(dst->ref, source->ref, sizeof(float));
+		return 0;
+	}
+	// dst type is numeric
+	//s -> n
+	if (source->type == 's')
+	{
+		if ((dst->annotation)[0] == '_')
+		{
+			return -1;//protected
+		}
+		void *p = new_string_by((char*)(source->ref));
+		if (p == NULL)return -2;
+		free(dst->ref);
+		//dst->ref = new_li_string_by(((Li_String)(source->ref))->str);
+		dst->ref = p;
+		dst->type = source->type;
+		return 0;
+	}
+	//n -> n
+	dst->type = source->type;
+	memcpy(dst->ref, source->ref, sizeof(float));
+	return 0;
+
+}
+int assign_field_from_string(Field dst, char* val)
+{
+	float val_f;
+	int val_i;
+	switch (dst->type)
+	{
+	case 's':
+		return assign_string_field(dst, val);
+		break;
+	case 'S':
+		return assign_li_string((Li_String)(dst->ref), val);
+		break;
+	case 'd':case 'f':
+		if (str_is_numeric(val))
+		{
+			if (dst->type == 'd')
+			{
+				val_i = atoi(val);
+				*(int*)(dst->ref) = val_i;
+			}
+			else
+			{
+				val_f = atof(val);
+				*(float*)(dst->ref) = val_f;
+			}
+			
+		}
+		else// s -> n
+		{
+			if ((dst->annotation)[0] == '_')
+			{
+				return -1;
+			}
+			free(dst->ref);
+			//dst->ref = new_li_string_by(val);
+			dst->ref = new_string_by(val);
+			dst->type = 's';
+		}
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+
+// use relloc to reapply memory
+int assign_string_field(Field fed, const char* val)
+{
+	if (fed->annotation[0] == '_')return -2;//protected cannot write
+	if (fed->type != 's')return -3;//type error
+	int n = strlen(val);
+	void* p;
+	if (fed->ref != NULL)
+		p = realloc(fed->ref, n + 1);
+	else
+		p = malloc(n + 1);// init
+	if (p == NULL)return -1;
+	fed->ref = p;
+	strcpy((char*)(p), val);
+	return 0;
+}
+
+void field_to_string(char* tx, Field fed)
+{
+	switch (fed->type)
+	{
+	case 's':
+		strcpy(tx, (char*)(fed->ref));
+		break;
+	case 'f':
+		sprintf(tx, "%f", *((float*)(fed->ref)));
+		break;
+	case 'd':
+		sprintf(tx, "%d", *((int*)(fed->ref)));
+		break;
+	case 'S':
+		strcpy(tx, ((Li_String)(fed->ref))->str);
+		break;
+	default:
+		break;
+	}
+}
