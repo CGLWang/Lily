@@ -8,7 +8,7 @@
 #include<math.h>
 
 //#include <iostream>
-#include "shell_cal.h"
+#include "shell.h"
 //#include <string>
 //using namespace std;
 
@@ -299,14 +299,14 @@ int shell_do_cmd(char* rx)
 		}
 		Field fields = li_fields;
 		Field field = fields+index;
-		if (field->type != 's')
-		{
-			delete_list(list);
-			return -2;//type error
-		}
+		//if (field->type != 's')
+		//{
+		//	delete_list(list);
+		//	return -2;//type error
+		//}
 		//para[i] = ((Li_String)field->ref)->str;
-		para[i] = (char*)field->ref;
-
+		field_to_string(tx, field);
+		para[i] = tx;// (char*)field->ref;
 	}
 	return_code = (cmd->todo)(list->count, (char**)(list->content));
 	delete_list(list);
@@ -563,7 +563,6 @@ int assign_field_from_string(Field dst, char* val)
 	}
 	return 0;
 }
-
 
 // use relloc to reapply memory
 int assign_string_field(Field fed, const char* val)
