@@ -20,11 +20,11 @@ byte sum_check = 0;
 //	byte sum_check;
 //};
 int r_count = 0;
-void lily_cin(char c)
+void lily_in(char c)
 {
 	//static byte head[2] = { frame_head_0,frame_head_1 };
-	static byte step = 0, length = 0;
-	static bool in_frame = false;
+	//static byte step = 0, length = 0;
+	//static bool in_frame = false;
 	
 	r_count++;
 	//switch (step)
@@ -78,11 +78,11 @@ void lily_cin(char c)
 #ifdef in_debug
 	if (ri == 255)
 	{
-		lily_cout("255 end");
+		lily_out("255 end");
 	}
 	if (ri == hi)
 	{
-		lily_cout("cmd queue over flow");
+		lily_out("cmd queue over flow");
 	}
 #endif
 }
@@ -100,7 +100,7 @@ void lily_init()
 	lily_ui.hijacked = false;
 	if (lily_ui.cmds == NULL || lily_ui.fields == NULL|| lily_ui.hijacks==NULL)
 	{
-		lily_cout("lily init failed!");
+		lily_out("lily init failed!");
 		return;
 	}
 	Cmd_def new_cmd;
@@ -150,14 +150,14 @@ void lily_init()
 	fed.ref = tx;
 	public_field(fed);
 	//public_field(fed);
-	public_a_new_string_field((char*)"sf2",(char*) "test");
+	//public_a_new_string_field((char*)"test",(char*) "test");
 	//timer
 	lily_timers.timer_works = new_list(sizeof(Tasks_def), 4);
 	lily_timers.peroids = new_list(sizeof(unsigned int), 4);
 	lily_timers.ticks = new_list(sizeof(unsigned int), 4);
 	if (lily_timers.timer_works == NULL || lily_timers.peroids == NULL || lily_timers.ticks == NULL)
 	{
-		lily_cout("lily init failed!");
+		lily_out("lily init failed!");
 		return;
 	}
 }

@@ -25,9 +25,9 @@ typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
 
 //[hardware interface]
 #define lily_Delay(ms) osDelay(ms)
-#define lily_cout(msg) cout<<msg
+#define lily_out(msg) cout<<msg
 extern unsigned int lily_millis();
-void lily_cin(char UCA1RXBUF);
+void lily_in(char UCA1RXBUF);
 void lily_tick();
 
 

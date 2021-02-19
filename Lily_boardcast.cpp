@@ -14,7 +14,7 @@ void regist_to_boardcast(Boardcast* b, Tasks_def f)
 #ifdef in_debug
 	if (b == NULL || f == NULL)
 	{
-		lily_cout(">>boardcast exception NULL\n");
+		lily_out(">>boardcast exception NULL\n");
 		return;
 	}
 #endif
@@ -26,7 +26,7 @@ void regist_to_boardcast(Boardcast* b, Tasks_def f)
 	if (b->audience_number == boardcast_recievers_number)
 	{
 #ifdef in_debug
-		lily_cout(">>boardcast add reciever overflow\n");
+		lily_out(">>boardcast add reciever overflow\n");
 #endif
 		b->audience_number = 0;
 	}
@@ -36,7 +36,7 @@ void deregist_from_boardcast(Boardcast* b, Tasks_def f)
 #ifdef in_debug
 	if (b == NULL || f == NULL)
 	{
-		lily_cout(">>boardcast exception NULL\n");
+		lily_out(">>boardcast exception NULL\n");
 		return;
 	}
 #endif

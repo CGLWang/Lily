@@ -22,7 +22,7 @@ void endTaskAt(char index)
 	if (index > hasTask)
 	{
 #ifdef in_debug
-		lily_cout("error invalid index");
+		lily_out("error invalid index");
 		return;
 #endif // in_debug
 
@@ -156,7 +156,7 @@ void run_tasks()
 #ifdef in_debug
 			if (tasks[i] == NULL)
 			{
-				lily_cout("null ptr");
+				lily_out("null ptr");
 				break;
 			}
 				
@@ -173,7 +173,7 @@ void run_tasks()
 		{
 			if (tasks_[front] == NULL)
 			{
-				lily_cout("null ptr");
+				lily_out("null ptr");
 				if (++front >= Tasks_LEN)
 					front = 0;
 				continue;

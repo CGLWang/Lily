@@ -217,7 +217,7 @@ int shell_cal_exp_cmd(int n, char** arg)
 		if(isnan(result))return -1;
 		//if (result == NAN)return - 1;
 		sprintf(tx, "%f\n", result);
-		lily_cout(tx);
+		lily_out(tx);
 	}
 	else if (n == 3)
 	{
@@ -242,9 +242,9 @@ int shell_cal_exp_cmd(int n, char** arg)
 		}
 		else
 			return -4;
-		lily_cout(arg[1]);
+		lily_out(arg[1]);
 		sprintf(tx, "=%f\n", result);
-		lily_cout(tx);
+		lily_out(tx);
 
 	}
 	return 0;
@@ -449,7 +449,7 @@ int shell_do_fields(char* rx)
 	
 	//show
 	//pattern[2] = first_field->type;
-	lily_cout(first_field->name);
+	lily_out(first_field->name);
 	//switch (first_field->type)
 	//{
 	//case 'f':
@@ -467,16 +467,16 @@ int shell_do_fields(char* rx)
 	//}
 	tx[0] = '=';
 	field_to_string(tx+1, first_field);
-	lily_cout(tx);
-	lily_cout("\n");
+	lily_out(tx);
+	lily_out("\n");
 	delete_list(li);
 	return 1;
 }
 int shell_do_notFound(char* rx)
 {
-	lily_cout("no cmd:\"");
-	lily_cout(rx);
-	lily_cout("\"\n");
+	lily_out("no cmd:\"");
+	lily_out(rx);
+	lily_out("\"\n");
 	return 1;
 }
 

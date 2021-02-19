@@ -46,9 +46,9 @@ char* get_cmd_from_rx()
 	}
 #ifdef in_debug
 	if (i == len)
-		lily_cout("cmd too long");
+		lily_out("cmd too long");
 	if (hi+1 != ri)//read done
-		lily_cout("cmd queue error");
+		lily_out("cmd queue error");
 #endif // in_debug
 
 	cmd[i] = '\0';
@@ -106,7 +106,7 @@ int excute_cmd()
 	if (code < 0)
 	{
 		sprintf(tx, "error(%d)\n", code);
-		lily_cout(tx);
+		lily_out(tx);
 	}
 	return 0;
 }
@@ -117,7 +117,7 @@ void add_hijack(Arg_Tasks_def call_back)
 	lily_ui.hijacked = true;
 	if (stack_top >= stack_len)
 	{
-		lily_cout(">>ui stack overflow!");
+		lily_out(">>ui stack overflow!");
 		stack_top = 0;
 		lily_ui.hijacked = false;
 	}
@@ -162,7 +162,7 @@ int help(int nargin, char** arg)
 		if (index >= 0)
 		{
 			sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
-			lily_cout(tx);
+			lily_out(tx);
 			continue;
 		}
 		//int n = lily_ui.cmds->count;
@@ -183,10 +183,10 @@ int help(int nargin, char** arg)
 		{
 			char s[] = "f";
 			sprintf(tx, ">>%s:%s, type:", q[index].name, q[index].annotation);
-			lily_cout(tx);
+			lily_out(tx);
 			s[0] = q[index].type;
-			lily_cout(s);
-			lily_cout("\n");
+			lily_out(s);
+			lily_out("\n");
 			//sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
 			//lily_cout(tx);
 			continue;
@@ -207,26 +207,26 @@ int help(int nargin, char** arg)
 			}
 		}*/
 		//if(hit)continue;
-		lily_cout(">>not found help of:");
-		lily_cout(item);
-		lily_cout("\n");
+		lily_out(">>not found help of:");
+		lily_out(item);
+		lily_out("\n");
 		return -1;
 	}
 
 	if (nargin>1)
 		return 0;
-	lily_cout(">cmds:\n");
+	lily_out(">cmds:\n");
 	for (int i = 0; i < lily_ui.cmds->count; i++)
 	{
 		sprintf(tx, "%d- %s:\n", i, p[i].name);
-		lily_cout(tx);
+		lily_out(tx);
 	}
 	Field_def* q = (Field_def*)(lily_ui.fields->content);
-	lily_cout(">fields:\n");
+	lily_out(">fields:\n");
 	for (int i = 0; i < lily_ui.fields->count; i++)
 	{
 		sprintf(tx, "%d- %s\n", i, q[i].name);
-		lily_cout(tx);
+		lily_out(tx);
 	}
 	return 0;
 }
@@ -261,8 +261,8 @@ int delete_field(int n, char** arg)
 		int index = search_field_in_Lily_ui(arg[i]);
 		if (index < 0)
 		{
-			lily_cout(arg[1]);
-			lily_cout(" not found\n");
+			lily_out(arg[1]);
+			lily_out(" not found\n");
 			return -1;
 		}
 		Field_def* q = (Field_def*)(lily_ui.fields->content);
@@ -277,7 +277,7 @@ int delete_field(int n, char** arg)
 
 		list_remove_at(lily_ui.fields, index);
 	}
-	lily_cout("done\n");
+	lily_out("done\n");
 	return 0;
 }
 
@@ -298,18 +298,18 @@ int whos(int nargin, char** arg)
 			{
 				char s[] = "f";
 				sprintf(tx, ">>%s:%s, type:", q[i].name, q[i].annotation);
-				lily_cout(tx);
+				lily_out(tx);
 				s[0] = q[i].type;
-				lily_cout(s);
-				lily_cout("\n");
+				lily_out(s);
+				lily_out("\n");
 				hit = true;
 				break;
 			}
 		}
 		if (hit)continue;
-		lily_cout(">>not found help of:");
-		lily_cout(item);
-		lily_cout("\n");
+		lily_out(">>not found help of:");
+		lily_out(item);
+		lily_out("\n");
 		return -1;
 	}
 
@@ -320,7 +320,7 @@ int whos(int nargin, char** arg)
 	for (int i = 0; i < lily_ui.fields->count; i++)
 	{
 		sprintf(tx, "%d- %s:", i, q[i].name);
-		lily_cout(tx);
+		lily_out(tx);
 		switch (q[i].type)
 		{
 		case 's':
@@ -338,7 +338,7 @@ int whos(int nargin, char** arg)
 		default:
 			break;
 		}
-		lily_cout(tx);
+		lily_out(tx);
 	}
 	return 0;
 }
@@ -346,13 +346,13 @@ int whos(int nargin, char** arg)
 int system(int n, char** arg)
 {
 	//task
-	lily_cout("tasks:");
+	lily_out("tasks:");
 	int_to_string(hasTask,tx);
-	lily_cout(tx);
-	lily_cout("-");
+	lily_out(tx);
+	lily_out("-");
 	int_to_string((rear + Tasks_LEN - front ) % Tasks_LEN, tx);
-	lily_cout(tx);
-	lily_cout("\n");
+	lily_out(tx);
+	lily_out("\n");
 	return 0;
 }
 //creat and public a cmd with defaults

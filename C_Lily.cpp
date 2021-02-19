@@ -20,6 +20,10 @@ unsigned int lily_millis()
 }
 int cmd_test0(int arg,char**);
 int cmd_test1(int arg, char**);
+void void_fun();
+char void_fun2();
+void void_fun3();
+void void_fun4(char* arg);
 
 int timer0();
 
@@ -53,7 +57,10 @@ int main()
     cmd1.todo = (Arg_Tasks_def)exit;
     
     public_cmd(cmd1);
-
+    public_a_cmd_link("clc", (Arg_Tasks_def)void_fun);
+    public_a_cmd_link("cl2", (Arg_Tasks_def)void_fun2);
+    public_a_cmd_link("cl3", (Arg_Tasks_def)void_fun3);
+    public_a_cmd_link("cl4", (Arg_Tasks_def)void_fun4);
 	/*Cmd_def help;
 	help.cmd = (char*)"text";
 	help.annotation = (char*)"set fields";
@@ -114,7 +121,7 @@ int key_input_task()
         cout << cv;
         if (cv == '\r')
             cv = '\n';
-        lily_cin(cv);
+        lily_in(cv);
     }    
 
     return 1;
@@ -199,6 +206,27 @@ int timer1()
         remove_timer(timer1);
 	cout << "->timer1 tick 5cycles\n";
 	return end;
+}
+
+void void_fun()
+{
+    cout << "void enter\n";
+}
+char void_fun2()
+{
+    cout << "void enter2\n";
+    return 1;
+}
+void void_fun3()
+{
+    cout << "void enter3\n";
+    cout << "hallo";
+}
+void void_fun4(char*arg)
+{
+    cout << "<in>";
+    cout << arg; 
+    cout << "<//end>\n";
 }
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
 // 调试程序: F5 或调试 >“开始调试”菜单

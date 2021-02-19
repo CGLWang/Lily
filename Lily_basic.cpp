@@ -444,7 +444,7 @@ void limit_from_to(float* x, float lower, float upper)
 		*x = upper;
 }
 
-
+//int li_count = 0;
 int init_list(Lily_List* list, unsigned int unit_size2, unsigned int init_cap)
 {
 	list->type_size = unit_size2;
@@ -457,6 +457,11 @@ int init_list(Lily_List* list, unsigned int unit_size2, unsigned int init_cap)
 }
 Lily_List* new_list(unsigned int type, unsigned int init_cap)
 {
+	//li_count++;
+	//static char tx[30];
+	//sprintf(tx,"+>%d\n",li_count);
+	//lily_out(tx);
+
 	Lily_List* list = (Lily_List*)malloc(sizeof(Lily_List));
 	if (list == NULL)return list;
 	list->count = 0;
@@ -533,6 +538,10 @@ int list_find(Lily_List* list, void* item)
 int delete_list(Lily_List* list)
 {
 	if (list == NULL)return -1;
+	//li_count--;
+	//static char tx[30];
+	//sprintf(tx, "->%d\n", li_count);
+	//lily_out(tx);
 	if (list->content != NULL)
 		free(list->content);
 	free(list);
