@@ -139,6 +139,7 @@ float shell_calculate_expression(char* rx)
 	if (opes == NULL)
 	{
 		delete_list(opes_index);
+		lily_error_msg = "malloc error";
 		return NAN;
 	}
 		
@@ -154,12 +155,14 @@ float shell_calculate_expression(char* rx)
 	if (list->count - n != 1)
 	{
 		delete_list(list);
+		lily_error_msg = "number not match";
 		return NAN;
 	}
 	Li_List values_ = valcues_of_fields(list);
 	delete_list(list);
 	if (values_ == NULL)
 	{
+		lily_error_msg = "field missing or not numeric";
 		return NAN;
 	}
 	float* values = list_content(values_, float);
@@ -214,7 +217,11 @@ int shell_cal_exp_cmd(int n, char** arg)
 	if (n == 2)
 	{
 		result = shell_calculate_expression(arg[1]);
-		if(isnan(result))return -1;
+		if (isnan(result))
+		{
+			return -1;
+		}
+
 		//if (result == NAN)return - 1;
 		sprintf(tx, "%f\n", result);
 		lily_out(tx);
@@ -241,7 +248,11 @@ int shell_cal_exp_cmd(int n, char** arg)
 			*((int*)(field->ref)) = (int)result;
 		}
 		else
+		{
+			lily_error_msg = "field is not numeric";
 			return -4;
+		}
+			
 		lily_out(arg[1]);
 		sprintf(tx, "=%f\n", result);
 		lily_out(tx);
@@ -295,6 +306,7 @@ int shell_do_cmd(char* rx)
 		if (index < 0)
 		{
 			delete_list(list);
+			lily_error_msg = "\'$\' false used, field not exists";
 			return -1;// index out
 		}
 		Field fields = li_fields;
@@ -313,6 +325,120 @@ int shell_do_cmd(char* rx)
 	if (return_code < 0)
 	{
 		return return_code;
+	}
+	return 1;
+}
+int shell_do_fun(char* rx)
+{
+	int hit = 0;
+	hit = search_fun_in_Lily_ui(rx);
+	if (hit < 0)return 0;//not hit, to next proess
+
+	Fun fun = &li_funs[hit];
+	void* f = fun->ref;
+	typedef void (*f0)();
+	typedef void (*f1)(float);
+	typedef void (*f2)(float, float);
+	typedef void (*f3)(float, float, float);
+	typedef void (*f4)(float, float, float, float);
+
+	if (fun->narg == 0)
+	{
+		((f0)f)();
+		return 1;
+	}
+	str_replace_by_str(rx,"(),", ' ');
+	Li_List list = str_split(rx, ' ');
+	hit = list->count;
+	string_* para = (char**)(list->content);
+	float* nums = (float*)(list->content);
+	int error = 0;
+	for (int i = 1; i < hit; i++)//skip the first one
+	{
+		if (str_is_numeric(para[i]))
+		{
+			float num = str_to_float(para[i]);
+			nums[i] = num;
+			continue;
+		}
+		//replace para[i] to the field content
+		int index = search_field_in_Lily_ui(para[i]);
+		if (index < 0)
+		{
+			error = -1; 
+			lily_error_msg = "field not exists";
+			break;
+		}
+		Field field = li_fields + index;
+		if (field->type == 'f')
+		{
+			nums[i] = *((float*)field->ref);
+		}
+		else if (field->type == 'd')
+		{
+			nums[i] = *((int*)field->ref);
+		}
+		else
+		{
+			error = -3;
+			lily_error_msg = "field is not numeric";
+			break;
+			
+		}
+	}
+	if (error != 0)
+	{
+		delete_list(list);
+		return error;
+	}
+
+	int narg = list->count -1;
+	nums += 1;
+	if (~(fun->narg) != 0) // 
+	{
+		narg = fun->narg;// need narg paras
+		if (list->count - 1 < narg)
+		{
+			static float nums_n[4];
+			int i;
+			for (i = 0; i < list->count - 1; i++)
+				nums_n[i] = nums[i];
+			if (i == 0)//no para provided
+			{
+				nums_n[i++] = 0.0f;	
+			}
+			for(;i<narg;i++)
+				nums_n[i] = nums_n[i-1]; // fill with the last number
+			nums = nums_n;
+		}
+	}
+	
+	switch (narg)
+	{
+	case 0:
+		((f0)f)();
+		break;
+	case 1:
+		((f1)f)(nums[0]);
+		break;
+	case 2:
+		((f2)f)(nums[0], nums[1]);
+		break;
+	case 3:
+		((f3)f)(nums[0], nums[1], nums[2]);
+		break;
+	case 4:
+		((f4)f)(nums[0], nums[1], nums[2], nums[3]);
+		break;
+	default:
+		error = -4;
+		lily_error_msg = "too many paras(>5)";
+		break;
+	}
+	delete_list(list);
+	if (error < 0)
+	{
+		return error;
 	}
 	return 1;
 }
@@ -352,6 +478,7 @@ int shell_do_fields(char* rx)
 	int n = li->count;
 	if (n>2)// contains too many '='
 	{
+		lily_error_msg = "too many \'=\'";
 		delete_list(li);
 		return -3;
 	}
@@ -586,7 +713,10 @@ void field_to_string(char* tx, Field fed)
 	switch (fed->type)
 	{
 	case 's':
-		strcpy(tx, (char*)(fed->ref));
+		if (fed->ref != NULL)
+			strcpy(tx, (char*)(fed->ref));
+		else
+			tx[0] = '\0';
 		break;
 	case 'f':
 		sprintf(tx, "%f", *((float*)(fed->ref)));

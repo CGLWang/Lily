@@ -34,6 +34,8 @@ void task6(char* s);
 int key_input_task();
 int sleep_task();
 int task4();
+void f2(float, float);
+void f4(float a, float b, float c, float d);
 
 int main()
 {
@@ -61,6 +63,8 @@ int main()
     public_a_cmd_link("cl2", (Arg_Tasks_def)void_fun2);
     public_a_cmd_link("cl3", (Arg_Tasks_def)void_fun3);
     public_a_cmd_link("cl4", (Arg_Tasks_def)void_fun4);
+    public_a_fun_link("f2", f2);
+    public_a_fun_link_n("f4", f4,4);
 	/*Cmd_def help;
 	help.cmd = (char*)"text";
 	help.annotation = (char*)"set fields";
@@ -110,6 +114,7 @@ void task6(char* s)
 int key_input_task()
 {
 	static int c = 0;
+    static char new_one = 1;
 	c++;
 	if (c >= 3)
 		c = 0;
@@ -117,13 +122,24 @@ int key_input_task()
     char cv;
     if (_kbhit())
     {
+        if (new_one)
+        {
+            cout << ">>";
+            new_one = 0;
+        }
         cv = _getch();
+        if (cv == '\b')
+            cout << "\b ";
+
         cout << cv;
         if (cv == '\r')
+        {
             cv = '\n';
+            cout << "\n";
+            new_one = 1; 
+        }
         lily_in(cv);
     }    
-
     return 1;
 }
 int sleep_task()
@@ -227,6 +243,14 @@ void void_fun4(char*arg)
     cout << "<in>";
     cout << arg; 
     cout << "<//end>\n";
+}
+void f2(float a, float b)
+{
+    cout << "f2(" << a << "," << b << ")\n";
+}
+void f4(float a, float b, float c, float d)
+{
+    cout << "f2(" << a << "," << b << "," << c << "," << d << ")\n";
 }
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
 // 调试程序: F5 或调试 >“开始调试”菜单

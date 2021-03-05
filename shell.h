@@ -10,6 +10,8 @@ int shell_cal_exp_cmd(int n, char** arg);
 
 int shell_do_cmd(char* rx);
 
+int shell_do_fun(char* rx);
+
 int shell_do_cal(char* rx);
 
 int shell_do_fields(char* rx);

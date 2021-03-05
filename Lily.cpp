@@ -6,9 +6,8 @@
 #include "Lily_ui.h"
 #include "Lily_boardcast.h"
 #include "shell.h"
-typedef unsigned char byte;
 
-byte sum_check = 0;
+const char* lily_error_msg=NULL;
 //typedef struct 
 //{
 //	byte head[2];
@@ -73,7 +72,11 @@ void lily_in(char c)
 	if (c == '\0')
 		addTask_(excute_cmd);
 	//}
-	
+	if (c == '\b')
+	{
+		ri--;
+	}
+	else 
 	rx[ri++] = c;
 #ifdef in_debug
 	if (ri == 255)
@@ -89,16 +92,29 @@ void lily_in(char c)
 
 
 float test_fields=12;
+int time_cmd(int n, char** a)
+{
+	float t = lily_millis();
+	sprintf(tx, "%f\n", t);
+	lily_out(tx);
+	return 0;
+}
 
+void echo_error()
+{
+	lily_out(lily_error_msg);
+	lily_out("\n");
+}
 void lily_init()
 {
 	tasks[0] = task_mointor;
 	lily_ui.cmds = new_list(sizeof(Cmd_def), 10);
 	lily_ui.fields = new_list(sizeof(Field_def), 10);
-	lily_ui.hijacks = new_list(sizeof(hijack), 4);
+	lily_ui.funs = new_list(sizeof(Fun_def), 4);
+	//lily_ui.hijacks = new_list(sizeof(hijack), 4);
 	lily_ui.para_updated = false;
 	lily_ui.hijacked = false;
-	if (lily_ui.cmds == NULL || lily_ui.fields == NULL|| lily_ui.hijacks==NULL)
+	if (lily_ui.cmds == NULL || lily_ui.fields == NULL|| lily_ui.funs ==NULL)
 	{
 		lily_out("lily init failed!");
 		return;
@@ -141,6 +157,14 @@ void lily_init()
 	new_cmd.id = 5;
 	public_cmd(new_cmd);
 
+	new_cmd.name = (char*)"delay";
+	new_cmd.annotation = (char*)"[ms]:delay cmd queue";
+	new_cmd.todo = delay_cmd;
+	new_cmd.id = 6;
+	public_cmd(new_cmd);
+
+	public_a_cmd_link("time", time_cmd);
+	public_a_fun_link_n("er", echo_error, 0);
 	public_a_field_ref("test_field", &test_fields);
 	Field_def fed = { (char*)"rcount",(char*)"_rxCount",(float*)&r_count,'d' };
 	public_field(fed);

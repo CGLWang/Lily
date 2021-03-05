@@ -73,8 +73,12 @@ char* get_cmd_from_rx()
 //
 //}
 
+float open_time = 0;
 int excute_cmd()
 {
+	float t = lily_millis();
+	if (t < open_time)
+		return 1; // go again
 	char* rx = get_cmd_from_rx();
 
 	while (*rx==' ')rx++;
@@ -96,8 +100,8 @@ int excute_cmd()
 
 	int code;
 	typedef int(*shell_do_def)(char*);
-	static shell_do_def shell_do[] = { shell_do_cmd,shell_do_cal,shell_do_fields,shell_do_notFound };
-	for (int i = 0; i < 4; i++)
+	static shell_do_def shell_do[] = { shell_do_cmd,shell_do_fun,shell_do_cal,shell_do_fields,shell_do_notFound };
+	for (int i = 0; i < 5; i++)
 	{
 		code = (shell_do[i])(rx);
 		if (code == 0)continue;
@@ -126,7 +130,7 @@ int search_cmd_in_Lily_ui(char* item)
 {
 	int i, n;
 	n = lily_ui.cmds->count;
-	Field cmds = (Field)(lily_ui.cmds->content);
+	Cmd cmds = (Cmd)(lily_ui.cmds->content);
 	for (i = 0; i < n; i++)
 	{
 		if (!str_equal(item, cmds[i].name))continue;
@@ -147,6 +151,19 @@ int search_field_in_Lily_ui(char* item)
 	}
 	return -1;
 }
+int search_fun_in_Lily_ui(char* item)
+{
+	int i, n;
+	n = lily_ui.funs->count;
+	Fun funs = li_funs;
+	for (i = 0; i < n; i++)
+	{
+		if (str_equal(item, funs[i].name))
+			return i;
+	}
+	return -1;
+
+}
 
 int help(int nargin, char** arg)
 {
@@ -165,6 +182,15 @@ int help(int nargin, char** arg)
 			lily_out(tx);
 			continue;
 		}
+		index = search_fun_in_Lily_ui(item);
+		if (index >= 0)
+		{
+			Fun r = li_funs;
+			sprintf(tx, ">>%s:%d\n", r[index].name, r[index].narg);
+			lily_out(tx);
+			continue;
+		}
+
 		//int n = lily_ui.cmds->count;
 		//for (int i = 0; i < n; i++)
 		//{
@@ -218,9 +244,17 @@ int help(int nargin, char** arg)
 	lily_out(">cmds:\n");
 	for (int i = 0; i < lily_ui.cmds->count; i++)
 	{
-		sprintf(tx, "%d- %s:\n", i, p[i].name);
+		sprintf(tx, "%d- %s\n", i, p[i].name);
 		lily_out(tx);
 	}
+	Fun r = li_funs;
+	lily_out(">funs:\n");
+	for (int i = 0; i < lily_ui.funs->count; i++)
+	{
+		sprintf(tx, "%d- %s\n", i, r[i].name);
+		lily_out(tx);
+	}
+
 	Field_def* q = (Field_def*)(lily_ui.fields->content);
 	lily_out(">fields:\n");
 	for (int i = 0; i < lily_ui.fields->count; i++)
@@ -355,6 +389,23 @@ int system(int n, char** arg)
 	lily_out("\n");
 	return 0;
 }
+
+int delay_cmd(int n, char** arg)
+{
+	if (n == 1)
+	{
+		open_time = lily_millis() + 1000.0f;
+		return 1;
+	}
+	else if (n == 2)
+	{
+		float t = atof(arg[1]);
+		if (t <= 0.0f)return -1;
+		open_time = lily_millis() + t;
+		return 1;
+	}
+	return -2;
+}
 //creat and public a cmd with defaults
 //just provide a name and fun ptr of this cmd
 void public_a_cmd_link(const char* name, Arg_Tasks_def link)
@@ -380,6 +431,16 @@ void public_a_field_ref(const char* name, void*link)
 	public_field(fed);
 }
 
+void public_a_fun_link(const char* name, void* link)
+{
+	Fun_def fun = {(char*)name,link,255};
+	public_fun(fun);
+}
+void public_a_fun_link_n(const char* name, void* link, char n)
+{
+	Fun_def fun = { (char*)name,link,n };
+	public_fun(fun);
+}
 int joint_args(int n,char** args)
 {
 	int i;

@@ -95,6 +95,28 @@ char str_replace(char* s, char from, char to)
 
 	return times;
 }
+char str_replace_by_str(char* s,const char* from, char to)
+{
+	char times = 0;
+	int i;
+
+	for (i = 0; s[i] != '\0'; i++)
+	{
+		const char* p = from;
+		while (*p!='\0')
+		{
+			if (*p == s[i])
+			{
+				s[i] = to;
+				times++;
+				break;
+			}
+			p++;
+		}
+	}
+
+	return times;
+}
 // '-123.45', '+13.890'
 int str_is_numeric(char* name)
 {
@@ -287,6 +309,51 @@ char int_to_string(int n, char* s)
 	return i + add;
 }
 
+float str_to_float(char* s)
+{
+	int integer = 0;
+	float decimal = 0.0f;
+	float kd = 0.1;
+	int in_decimal = 0;
+	char is_neg = 0;
+	if (*s == '-')
+	{
+		is_neg = 1;
+		s++;
+	}
+	else if (*s == '+')
+	{
+		s++;
+	}
+	for (; *s != '\0'; s++)
+	{
+		if (*s == '.')
+		{
+			in_decimal = 1;
+			continue;
+		}
+		if (!isD(*s))return 0.0f;
+		if (in_decimal)
+		{
+			float d = *s - '0';
+			
+			decimal += d * kd;
+			kd /= 10.0f;
+		}
+		else
+		{
+			int d = *s - '0';
+			integer *= 10;
+			integer += d;
+		}
+	}
+	if (is_neg)
+	{
+		return -(integer + decimal);
+	}
+	else
+		return (integer + decimal);
+}
 float* get_nums_from_rx(char* rs, int* length_back)
 {
 	static float nums[10];

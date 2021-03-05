@@ -27,8 +27,8 @@ typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
 #define lily_Delay(ms) osDelay(ms)
 #define lily_out(msg) cout<<msg
 extern unsigned int lily_millis();
+extern const char* lily_error_msg;
 void lily_in(char UCA1RXBUF);
 void lily_tick();
-
 
 void lily_init();
