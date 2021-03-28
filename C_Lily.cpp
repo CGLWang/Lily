@@ -16,7 +16,7 @@ using namespace std;
 unsigned int lily_millis()
 {
     unsigned int a = GetTickCount64();
-    return a / 1000;
+    return a / 10;
 }
 int cmd_test0(int arg,char**);
 int cmd_test1(int arg, char**);
@@ -146,7 +146,7 @@ int sleep_task()
 {
     //static int c = 0;
 	//cout << "-->task2:sleep" << endl;
-    Sleep(100);
+    Sleep(10);
     lily_tick();
    /* c++;
     if (c == 10)

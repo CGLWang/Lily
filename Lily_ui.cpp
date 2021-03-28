@@ -7,12 +7,15 @@ unsigned char ri, hi;
 char tx[64];
 unsigned char ti;
 
-//char clip_board[128];
 
 Lily_cmds_def lily_ui;//a value is copied, so a cmd or field can be add in a stack call
 
 static Arg_Tasks_def ui_stack[4];
 static char stack_top = 0;
+
+Tasks_def lily_hooks_cmd_done = NULL;
+char* lily_hooks_cmd_hook=NULL;
+
 // this fun also change the hi index
 // assert that the cmd is less than 31b in length
 char* get_cmd_from_rx()
@@ -79,23 +82,39 @@ int excute_cmd()
 	float t = lily_millis();
 	if (t < open_time)
 		return 1; // go again
-	char* rx = get_cmd_from_rx();
 
-	while (*rx==' ')rx++;
-	if (*rx == '\0')return -1;
+	char* rx;
+	if (lily_hooks_cmd_hook == NULL)
+		rx = get_cmd_from_rx();
+	else
+	{
+		rx = lily_hooks_cmd_hook;
+		lily_hooks_cmd_hook = NULL;
+	}
+
+	
 	// haijcked ?
 	if (stack_top)
 	{
-		Li_List list = str_split(rx, ' ');
-		char return_code = ui_stack[stack_top](list->count, (char**)(list->content));
+		//Li_List list = str_split(rx, ' ');
+		//char return_code = ui_stack[stack_top](list->count, (char**)(list->content));
+		char return_code = ui_stack[stack_top](1, &rx);
 		if (return_code == 0)// 0:done, -1:error
 			stack_top--;
 		if (!stack_top)
 		{
 			lily_ui.hijacked = false;
 		}
-		delete_list(list);
+		//delete_list(list);
 		return 0;
+	}
+
+	while (*rx == ' ')rx++;
+	if (*rx == '\0')
+	{
+		if (lily_hooks_cmd_done != NULL)
+			addTask_(lily_hooks_cmd_done);
+		return -1;
 	}
 
 	int code;
@@ -112,9 +131,11 @@ int excute_cmd()
 		sprintf(tx, "error(%d)\n", code);
 		lily_out(tx);
 	}
+	if (lily_hooks_cmd_done != NULL)
+		addTask_(lily_hooks_cmd_done);
 	return 0;
 }
-
+//添加劫持程序,call_back返回0释放劫持
 void add_hijack(Arg_Tasks_def call_back)
 {
 	ui_stack[++stack_top] = call_back;
@@ -441,6 +462,7 @@ void public_a_fun_link_n(const char* name, void* link, char n)
 	Fun_def fun = { (char*)name,link,n };
 	public_fun(fun);
 }
+//拼接由str_split分割的字符串
 int joint_args(int n,char** args)
 {
 	int i;
@@ -477,6 +499,7 @@ int public_a_new_string_field(char*name, char* s)
 // note:
 // it will apply a new memory to save [name] and [val], so when delete a field, free that first
 // this publication is only support a int and float field, for a string field, using [public_a_new_string_field]
+// return the index of new field, if it<0, error occured
 int public_a_new_field(char* name, char type, float val)
 {
 	Field_def fed;
@@ -505,3 +528,185 @@ int public_a_new_field(char* name, char type, float val)
 	return public_field(fed);
 }
 
+//like: for i = 1:10
+// j=i+1
+//end
+//or 
+//like: for i = 1:2:10
+// j=i+1
+//end
+typedef char* str;
+Li_List for_cmd_lines = NULL;
+float start_val, end_val, step_val = 1.0f;
+int now_at = 0;
+int iter_field_index;
+char need_delete_field = 0;
+Field iter_field = NULL;
+Li_String scopy = NULL;
+
+int end_for();
+int do_for_loop();
+char* get_cmd_line_at(int at);
+
+
+
+int hijackor_for_end(int n, char** args);
+
+int cmd_for_start(int n, char* args[])
+{
+	if (n < 2)return -1;
+	joint_args(n - 1, args + 1);
+	auto items = str_split_by_str(args[1], (char*)" =:");
+	
+	args = (char**)(items->content);
+
+	start_val = atof(args[1]);
+	iter_field_index = search_field_in_Lily_ui(args[0]);
+	
+	need_delete_field = 0;
+	if (iter_field_index < 0)
+	{
+		iter_field_index = public_a_new_field(args[0], 'f', start_val);
+		need_delete_field = 1;
+	}
+	
+	iter_field = li_fields + iter_field_index;
+
+	if (items->count == 4)
+	{
+		step_val = atof(args[2]);
+		end_val = atof(args[3]);
+	}
+	else if (items->count == 3)
+	{
+		step_val = 1.0f;
+		end_val = atof(args[2]);
+	}
+	else
+	{
+		li_error("bad arguments", -1);
+	}
+
+	add_hijack(hijackor_for_end);
+	for_cmd_lines = new_list(sizeof(str), 4);
+	return 0;
+}
+
+int hijackor_for_end(int n, char** args)
+{
+	char* s = args[0];
+	if (strcmp(s, "end") == 0)
+	{
+		lily_hooks_cmd_done = do_for_loop;
+		now_at = 0;
+		lily_hooks_cmd_hook = get_cmd_line_at(now_at);
+
+		addTask_(excute_cmd);
+		return 0;// free hijack
+	}
+	//save the cmd lines
+	
+	char* si = new_string_by(s);
+	if (li_add(for_cmd_lines, si) < 0)
+	{
+		lily_out("error");
+	}
+	return 1;
+}
+
+int end_for()
+{
+	int i, n;
+	n = for_cmd_lines->count;
+	str* ss = (str*)(for_cmd_lines->content);
+	for (i = 0; i < n; i++)
+	{
+		free(ss[i]);
+	}
+	free(for_cmd_lines);
+	for_cmd_lines = NULL;
+	delete_li_string(scopy);
+	scopy = NULL;
+	if (need_delete_field)
+	{
+		free(iter_field->name);
+		free(iter_field->ref);
+		iter_field = NULL;
+		list_remove_at(lily_ui.fields, iter_field_index);
+	}
+	return 0;
+}
+
+int do_for_loop()
+{
+	now_at++;
+	if (now_at >= for_cmd_lines->count)
+	{
+		now_at = 0;
+		start_val += step_val;
+		*(float*)(iter_field->ref) = start_val;
+		if (start_val > end_val)//iteration end
+		{
+			end_for();
+			lily_hooks_cmd_done = NULL;
+			return 0;
+		}
+	}
+	lily_hooks_cmd_hook = get_cmd_line_at(now_at);
+	addTask_(excute_cmd);
+	lily_hooks_cmd_done = do_for_loop;
+	return 0;
+}
+
+char* get_cmd_line_at(int at)
+{
+	if (for_cmd_lines->count == 0)
+	{
+		return (char*)"";
+	}
+	str* ss = (str*)(for_cmd_lines->content);
+	str s = ss[at];
+	if (scopy == NULL)
+	{
+		scopy = new_li_string_by(s);
+	}
+	else
+	{
+		assign_li_string(scopy, s);
+	}
+	return scopy->str;
+	
+}
+
+int hijackor_wait_key(int n, char** s)
+{
+	static char in_hijack = 0;
+	static Tasks_def hooks_copy = NULL;
+	if (in_hijack==0)
+	{
+		if (n == 2)
+		{
+			in_hijack = atoi(s[1]);
+		}
+		if(in_hijack<1)
+			in_hijack = 1;
+		hooks_copy = lily_hooks_cmd_done;
+		lily_hooks_cmd_done = NULL;
+		add_hijack(hijackor_wait_key);
+		lily_out("H>");
+		return 0;
+	}
+	else
+	{
+		in_hijack--;
+		if (in_hijack)
+		{
+			lily_out("H>");
+		}
+		if (hooks_copy != NULL)
+			addTask_(hooks_copy);
+
+		in_hijack = 0;
+		return 0;//free
+	}
+}

@@ -21,57 +21,14 @@ const char* lily_error_msg=NULL;
 int r_count = 0;
 void lily_in(char c)
 {
-	//static byte head[2] = { frame_head_0,frame_head_1 };
-	//static byte step = 0, length = 0;
-	//static bool in_frame = false;
-	
 	r_count++;
-	//switch (step)
-	//{
-	//case 0:
-	//	if (c == head[0])
-	//	{
-	//		step++;
-	//	}
-	//	break;
-	//case 1:
-	//	if (c == head[1])
-	//		step ++;
-	//	else step = 0;
-	//	break;
-	//case 2:
-	//	in_frame = true;
-	//	length = c;
-	//	sum_check = head[0] + head[1] + c;
-	//	step++;
-	//	break;
-	//case 3:
-	//	length--;
-	//	if (length)
-	//	{
-	//		sum_check = head[0] + head[1] + c;
-	//	}
-	//	else//end
-	//	{
-	//		if (c != sum_check)
-	//		{
-	//			lily_cout("sum check failed\n");
-	//		}
-	//		rx[ri++] = c;
-	//		step = 0;
-	//		in_frame = false;
-	//		c = '\0';
-	//	}
-	//default:
-	//	break;
-	//}
-	//if (!in_frame)
-	//{
 	if (c == ';' || c == '\n')
 		c = '\0';
 	if (c == '\0')
+	{
 		addTask_(excute_cmd);
-	//}
+	}
+		
 	if (c == '\b')
 	{
 		ri--;
@@ -146,21 +103,33 @@ void lily_init()
 	public_cmd(new_cmd);
 	
 	new_cmd.name = (char*)"sys";
-	new_cmd.annotation = (char*)":system info";
+	new_cmd.annotation = (char*)":sysInfo";
 	new_cmd.todo = system;
 	new_cmd.id = 4;
 	public_cmd(new_cmd);
 
 	new_cmd.name = (char*)"cal";
-	new_cmd.annotation = (char*)"[exp]:caculate expression";
+	new_cmd.annotation = (char*)"caculateExpression";
 	new_cmd.todo = shell_cal_exp_cmd;
 	new_cmd.id = 5;
 	public_cmd(new_cmd);
 
 	new_cmd.name = (char*)"delay";
-	new_cmd.annotation = (char*)"[ms]:delay cmd queue";
+	new_cmd.annotation = (char*)"delayMs";
 	new_cmd.todo = delay_cmd;
 	new_cmd.id = 6;
+	public_cmd(new_cmd);
+
+	new_cmd.name = (char*)"for";
+	new_cmd.annotation = (char*)"forLoops";
+	new_cmd.todo = cmd_for_start;
+	new_cmd.id = 7;
+	public_cmd(new_cmd);
+	//hijackor_wait_key
+	new_cmd.name = (char*)"wk";
+	new_cmd.annotation = (char*)"waitKey";
+	new_cmd.todo = hijackor_wait_key;
+	new_cmd.id = 8;
 	public_cmd(new_cmd);
 
 	public_a_cmd_link("time", time_cmd);

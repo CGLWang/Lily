@@ -221,3 +221,40 @@ int task_mointor()
 	//lily_cout(tx);
 	return 1;
 }
+
+
+#define queue_len 16
+static TasksArg_def fs_arg[queue_len];
+static void* args[queue_len];
+static char queue_front = 0, queue_back = 0;
+int delegate_task_for_args();
+void addTaskArg(TasksArg_def f, void* arg)
+{
+	fs_arg[queue_back] = f;
+	args[queue_back++] = arg;
+	if (queue_back >= queue_len)
+		queue_back = 0;
+	if (!hadTask_(delegate_task_for_args))
+		addTask_(delegate_task_for_args);
+}
+
+int delegate_task_for_args()
+{
+	static int code;
+	TasksArg_def f = fs_arg[queue_front];
+	void* a = args[queue_front];
+	code = f(a);// 0->end, 1-> again
+	if (code <= 0) //code==0
+	{
+		// if return 0, pop
+		queue_front++;
+		if (queue_front >= queue_len)
+			queue_front = 0;
+	}
+	if (queue_back == queue_front)
+		return 0;
+	return 1;
+}
+
+
+

@@ -45,3 +45,5 @@ void endTaskAt_(char index);
 
 void run_tasks();
 int task_mointor();
+
+void addTaskArg(TasksArg_def f, void* arg);

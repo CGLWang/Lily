@@ -52,7 +52,6 @@ typedef struct
 typedef Field_def* Field;
 typedef Cmd_def* Cmd;
 typedef Fun_def* Fun;
-
 #define stack_len 4
 
 extern char rx[];
@@ -61,7 +60,8 @@ extern unsigned char ri, hi;
 extern char tx[];
 extern unsigned char ti;
 extern Lily_cmds_def lily_ui;
-
+extern Tasks_def lily_hooks_cmd_done;
+extern char* lily_hooks_cmd_hook;
 
 int excute_cmd();
 void add_hijack(Arg_Tasks_def call_back);
@@ -89,6 +89,9 @@ void public_a_fun_link_n(const char* name, void* link, char n);
 int joint_args(int n, char** args);
 int public_a_new_string_field(char* name, char* s);
 int public_a_new_field(char* name, char type, float val);
+
+int cmd_for_start(int n, char* args[]);
+int hijackor_wait_key(int n, char** s);
 
 //this will copy a backup
 #define public_cmd(new_cmd) list_add(lily_ui.cmds, &new_cmd)

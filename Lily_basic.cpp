@@ -615,10 +615,9 @@ int delete_list(Lily_List* list)
 	return 0;
 }
 
-
 //depracted 
 // use new_string_by to creat sample string field
-Li_String new_li_tring_by(char* str)
+Li_String new_li_string_by(char* str)
 {
 	Li_String li_string = (Li_String)malloc(sizeof(Li_String_def));
 	if (li_string == NULL)return NULL;

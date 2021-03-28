@@ -6,7 +6,6 @@ using namespace std;
 
 #define True true
 #define False false
-#define not !
 
 #ifndef using_Lily
 #define using_Lily
@@ -18,7 +17,10 @@ using namespace std;
 #define in_debug
 #define end 0
 #define again 1
+#define var auto
+
 typedef int(*Tasks_def)();//return 0 meas task ended
+typedef int(*TasksArg_def)(void*);
 //typedef int (*Arg_Tasks_def)(void* argc, void* argv);
 typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
 
@@ -28,6 +30,7 @@ typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
 #define lily_out(msg) cout<<msg
 extern unsigned int lily_millis();
 extern const char* lily_error_msg;
+#define li_error(msg,code) lily_error_msg=msg;return code
 void lily_in(char UCA1RXBUF);
 void lily_tick();
 
