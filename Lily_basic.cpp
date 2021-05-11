@@ -2,6 +2,12 @@
 #include <string.h>
 #include "Lily.h"
 #include "Lily_basic.h"
+#ifdef in_PC
+#include<iostream>
+using namespace std;
+int new_count = 0;
+#endif // in_PC
+
 char str_startwith(char* s, char* cmd)
 {
 	int i, n;
@@ -18,7 +24,7 @@ char str_startwith(char* s, char* cmd)
 int str_contains(char* s, char c)
 {
 	for (int i = 0; s[i] != '\0'; i++)
-		if (s[i] == c)return 1;
+		if (s[i] == c)return i+1;
 	return 0;
 }
 int str_contains_by_str(char* s, char* c)
@@ -53,7 +59,8 @@ char str_equal(const char* s, const char* cmd)
 	if ('0' <= a && a <= '9')return 0;
 	return i;
 }
-int str_index(char* s, char c) //return 0 or 1
+// return -1 if not found
+int str_index(char* s, char c) 
 {
 	int i;
 	for (i = 0; s[i] !='\0'; i++)
@@ -174,7 +181,7 @@ Li_List str_split(char* str, char split_char)
 	Li_List list = new_list(sizeof(char*), 4);
 	if (*str == '\0')
 		return list;
-	char *last,*next;
+	char* last;// , * next;
 	char* now = str;
 	if (*now != split_char)
 	{
@@ -182,7 +189,7 @@ Li_List str_split(char* str, char split_char)
 	}
 	last = now;
 	now++;
-	next = now;
+	// next = now;
 	while (*now != '\0')
 	{
 		if (*last == split_char && *now != split_char)
@@ -212,7 +219,7 @@ Li_List str_split_by_str(char* str, char* split_char)
 	Li_List list = new_list(sizeof(char*), 4);
 	if (*str == '\0')
 		return list;
-	char* last, * next;
+	char* last;//, * next;
 	char* now = str;
 	if(!str_contains(split_char, *now))
 	//if (*now != split_char)
@@ -221,7 +228,7 @@ Li_List str_split_by_str(char* str, char* split_char)
 	}
 	last = now;
 	now++;
-	next = now;
+	// next = now;
 	while (*now != '\0')
 	{
 		if (str_contains(split_char, *last) && !str_contains(split_char, *now))
@@ -517,6 +524,10 @@ int init_list(Lily_List* list, unsigned int unit_size2, unsigned int init_cap)
 	list->type_size = unit_size2;
 	list->cap = 0;
 	list->content = (char*)calloc(init_cap, unit_size2);
+#ifdef in_PC
+	new_count++;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 	if (list->content == NULL)return 1;
 	list->cap = init_cap;
 	list->count = 0;
@@ -530,10 +541,18 @@ Lily_List* new_list(unsigned int type, unsigned int init_cap)
 	//lily_out(tx);
 
 	Lily_List* list = (Lily_List*)malloc(sizeof(Lily_List));
+#ifdef in_PC
+	new_count++;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 	if (list == NULL)return list;
 	list->count = 0;
 	list->type_size = type;
 	list->content = (char*)calloc(init_cap, type);
+#ifdef in_PC
+	new_count++;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 	if (list->content == NULL)
 		list->cap = 0;
 	else
@@ -605,13 +624,13 @@ int list_find(Lily_List* list, void* item)
 int delete_list(Lily_List* list)
 {
 	if (list == NULL)return -1;
-	//li_count--;
-	//static char tx[30];
-	//sprintf(tx, "->%d\n", li_count);
-	//lily_out(tx);
 	if (list->content != NULL)
 		free(list->content);
 	free(list);
+#ifdef in_PC
+	new_count -= 2;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 	return 0;
 }
 
@@ -623,10 +642,17 @@ Li_String new_li_string_by(char* str)
 	if (li_string == NULL)return NULL;
 	int n = strlen(str);
 	li_string->str =(char*) malloc(n+1);
-	
+#ifdef in_PC
+	new_count += 2;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 	if (li_string->str == NULL)
 	{
 		free(li_string);
+#ifdef in_PC
+		new_count--;
+		cout << "#" << new_count << "#";
+#endif // in_PC
 		return NULL;
 	}
 	strcpy(li_string->str, str);
@@ -637,6 +663,14 @@ char* new_string_by(char* str)
 {
 	int n = strlen(str) + 1;
 	void *p = malloc(n);
+#ifdef in_PC//start malloc(.*);\r\n#if
+	new_count++;
+	cout << "#" << new_count << "#";
+#endif // in_PC
+#ifdef in_debug
+	if (p == NULL)lily_out("new_string_by failed");
+#endif // in_debug
+
 	if (p == NULL)return NULL;
 	strcpy((char*)p, str);
 	return (char*)p;
@@ -646,6 +680,10 @@ void delete_li_string(Li_String li)
 {
 	free(li->str);
 	free(li);
+#ifdef in_PC
+	new_count -= 2;
+	cout << "#" << new_count << "#";
+#endif // in_PC
 }
 int assign_li_string(Li_String li, char* source)
 {

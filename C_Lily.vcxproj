@@ -143,6 +143,7 @@
     <ClCompile Include="Lily.cpp" />
     <ClCompile Include="Lily_basic.cpp" />
     <ClCompile Include="Lily_boardcast.cpp" />
+    <ClCompile Include="Lily_for.cpp" />
     <ClCompile Include="Lily_tasks.cpp" />
     <ClCompile Include="Lily_ui.cpp" />
     <ClCompile Include="shell.cpp" />
@@ -151,9 +152,13 @@
     <ClInclude Include="Lily.h" />
     <ClInclude Include="Lily_basic.h" />
     <ClInclude Include="Lily_boardcast.h" />
+    <ClInclude Include="Lily_for.h" />
     <ClInclude Include="Lily_tasks.h" />
     <ClInclude Include="Lily_ui.h" />
     <ClInclude Include="shell.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="文本.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

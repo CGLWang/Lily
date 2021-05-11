@@ -15,6 +15,13 @@ void deregist_from_boardcast(Boardcast* b, Tasks_def f);
 void public_a_timer(Tasks_def task, unsigned int period);
 
 int remove_timer(Tasks_def task);
+//reurn -1 if not found
+int find_timer(Tasks_def task);
+
+int add_timer_once(Tasks_def task, int count);
+int change_quick_timer_count(Tasks_def timer, int newCount);
+int create_or_change_quick_timer_count(Tasks_def timer, int newCount);
+
 
 
 typedef struct
@@ -23,3 +30,7 @@ typedef struct
 }Lily_timers;
 
 extern Lily_timers lily_timers;
+
+#define Hz(x) (40/x)
+#define Second(s) (40*s)
+void lily_tick();

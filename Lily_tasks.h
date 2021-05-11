@@ -1,7 +1,7 @@
 #pragma once
 #include "Lily.h"
 #ifdef Tasks_using_pool
-#define Tasks_LEN 11
+#define Tasks_LEN 32
 extern Tasks_def tasks[Tasks_LEN];
 extern int hasTask;
 

@@ -1,0 +1,14 @@
+shell.cpp/shell_calculate_expression
+char* opes = (char*)malloc(n + 1);
+未释放
+
+ui.cpp/end_for
+for_cmd_lines.content 未释放
+
+public_a_field_ref(args[0])使用静态变量来保存name
+
+shell.c/ do_cmd 代理直接指令执行后返回值
+
+str_contains return i+1
+
+Field 更名为Var, 's'类型标识符更改为'c'，type字段最高最高位用作标志.ref作为指针和值的区别，

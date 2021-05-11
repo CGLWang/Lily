@@ -13,7 +13,7 @@
 #include "Lily_ui.h"
 #include "Lily_boardcast.h"
 using namespace std;
-unsigned int lily_millis()
+unsigned int li_millis()
 {
     unsigned int a = GetTickCount64();
     return a / 10;
@@ -34,13 +34,21 @@ void task6(char* s);
 int key_input_task();
 int sleep_task();
 int task4();
-void f2(float, float);
-void f4(float a, float b, float c, float d);
+float f2(float, float);
+float f4(float a, float b, float c, float d);
 
+void li_out(const char*s)
+{
+    cout<<s;
+}
 int main()
 {
+    //cout << sizeof(Var_def)<<endl;
+    //cout << sizeof(Var1_def) << endl;
     Tasks_def task_p;
     lily_init();
+    lily_out = li_out;
+    lily_millis = li_millis;
     addTask(key_input_task);
     addTask(sleep_task);
     char s[] = "help s";
@@ -71,6 +79,11 @@ int main()
 	help.type = with_bytes;
 	help.todo = task5;
 	public_cmd(help);*/
+
+    int aint[16] = {0};
+    float bf[16] = { 0.0f };
+    public_a_field_ref("bf", bf);
+    public_a_field_ref_type("ai", aint, 'd');
 
     public_a_cmd_link("text", cmd_test1);
     public_a_timer(timer0, 30);
@@ -244,13 +257,15 @@ void void_fun4(char*arg)
     cout << arg; 
     cout << "<//end>\n";
 }
-void f2(float a, float b)
+float f2(float a, float b)
 {
     cout << "f2(" << a << "," << b << ")\n";
+    return a + b;
 }
-void f4(float a, float b, float c, float d)
+float f4(float a, float b, float c, float d)
 {
     cout << "f2(" << a << "," << b << "," << c << "," << d << ")\n";
+    return a + b + c + d;
 }
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
 // 调试程序: F5 或调试 >“开始调试”菜单

@@ -1,6 +1,13 @@
 #pragma once
-#define isA(c) ('a'<=c&&c<='z')
+#define isUpper(c) ('A' <= c && c <= 'Z')
+#define isLower(c) ('a' <= c && c <= 'z')
+#define toUpper(c) (c&~0x20)
+#define toLower(c) (c|0x20)
+#define reLU(c) (c^0x20)
+
+#define isA(c) (isLower(c)||isUpper(c))
 #define isD(c) ('0'<=c&&c<='9')
+
 
 char str_startwith(char* s, char* cmd);
 int str_contains(char* s, char c);

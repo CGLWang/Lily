@@ -36,6 +36,9 @@
     <ClCompile Include="shell.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Lily_for.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lily.h">
@@ -56,5 +59,13 @@
     <ClInclude Include="shell.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Lily_for.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="文本.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>
