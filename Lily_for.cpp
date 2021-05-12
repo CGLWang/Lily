@@ -1,14 +1,10 @@
-#include "Lily_ui.h"
-#include "Lily_basic.h"
-#include "Lily_tasks.h"
-#include "Lily.h"
-#include "Lily_for.h"
-#include "shell.h"
-
 #ifdef in_PC
-#include <iostream>
-using namespace std;
+#include "Lily_help.h"
 extern int new_count;
+
+#else
+#include "Lily_help.h"
+#include <string.h>
 #endif // in_PC
 
 //like: for i = 1:10
@@ -18,7 +14,7 @@ extern int new_count;
 //like: for i = 1:2:10
 // j=i+1
 //end
-#define for_show_detial
+
 typedef char *str;
 typedef struct
 {
@@ -26,10 +22,10 @@ typedef struct
 	Li_List for_cmd_lines; //循环执行的指令列表
 	float end_val, step_val;
 	char now_at;			//执行指令计数
-	char var_at; //迭代变量 偏置
+	char var_at;			//迭代变量 偏置
 	char need_delete_field; //end时是否需要删除变量
 	char be_greater;		//迭代方向，增加/减小
-	
+
 } ForItem_def;
 
 typedef struct
@@ -162,16 +158,14 @@ int cmd_for_start(int n, char *args[]) // call by lily_do
 		{
 		case 'f':
 			set_value_of_var(iter_field, var_at, to_voidf(start));
-			// *(float *)(iter_field->ref) = start;
 			break;
 		case 'd':
 		case 'c':
 			set_value_of_var(iter_field, var_at, to_void((int)start));
-			// *(int *)(iter_field->ref) = start;
 			break;
 		default:
 			delete_list(items);
-			li_error("bad var", -5);
+			// li_error("bad var", -5);
 			break;
 		}
 	}
@@ -261,22 +255,22 @@ int do_for_loop()
 		switch (iter_field->type)
 		{
 		case 'f':
-			assign_f_from_void(start_val,get_value_of_var(iter_field,var_at));
+			assign_f_from_void(start_val, get_value_of_var(iter_field, var_at));
 			start_val += *step_val;
-			set_value_of_var(iter_field,var_at,to_voidf(start_val));
+			set_value_of_var(iter_field, var_at, to_voidf(start_val));
 			// *(float *)(iter_field->ref) += *step_val;
 			// start_val = *(float *)(iter_field->ref);
 			break;
 		case 'd':
 		case 'c':
-			vi = (int)get_value_of_var(iter_field,var_at);
-			vi+= *step_val;// abs(step_val)>1
-			set_value_of_var(iter_field,var_at,to_void(vi));
-			
+			vi = (int)get_value_of_var(iter_field, var_at);
+			vi += *step_val; // abs(step_val)>1
+			set_value_of_var(iter_field, var_at, to_void(vi));
+
 			// *(int *)(iter_field->ref) += *step_val;
-			start_val = vi;//*(int *)(iter_field->ref);
+			start_val = vi; //*(int *)(iter_field->ref);
 			break;
-		
+
 		default:
 			break;
 		}
@@ -368,7 +362,7 @@ char *get_cmd_line_at(Li_List for_cmd_lines, int at)
 
 void update_for_area()
 {
-	if (for_stack_count < 0)
+	if (for_stack_count >= for_stack_len)
 	{
 		lily_out("error for_stack_count<0\n");
 		return;
@@ -412,32 +406,7 @@ int cmd_loop_start(int n, char *args[]) //loop 3
 	{
 		li_error("bad arg", -2);
 	}
-	// if (str_is_numeric(args[1]))
-	// {
-	// 	loop_count_ = atoi(args[1]);
-	// }
-	// else
-	// {
-	// 	int index = search_field_in_Lily_ui(args[1]);
-	// 	if (index < 0)
-	// 	{
-	// 		li_error("field miss", -2);
-	// 	}
-	// 	Var fed = li_vars + index;
-	// 	switch (fed->type)
-	// 	{
-	// 	case 'f':
-	// 		loop_count_ = *(float *)(fed->ref);
-	// 		break;
-	// 	case 'd':
-	// 		loop_count_ = *(int *)(fed->ref);
-	// 		break;
-	// 	default:
-	// 		li_error("field type not match", -3);
-	// 		break;
-	// 	}
-	// }
-
+	
 	loop_cmd_lines = new_list(sizeof(str), 4);
 	if (loop_cmd_lines == NULL)
 	{
@@ -591,107 +560,3 @@ void fun_exit()
 	release_all();
 	release_all_loops();
 }
-
-//int cmd_for_start(int n, char* args[])// call by lily_do
-//{
-//	if (n < 2)
-//		return -1;
-//	joint_args(n - 1, args + 1);// i=1:0.1:3
-//	Li_List items = str_split_by_str(args[1], (char*)" =:");// [ i 1 0.1 3]
-//
-//	args = (char**)(items->content);
-//	float start, step, endv;
-//	char be_greater_;
-//	char need_delete_field_;
-//
-//	if (items->count == 4)
-//	{
-//		step = atof(args[2]);
-//		endv = atof(args[3]);
-//	}
-//	else if (items->count == 3)
-//	{
-//		step = 1.0f;
-//		endv = atof(args[2]);
-//	}
-//	else
-//	{
-//		delete_list(items);
-//		li_error("bad arguments", -66);
-//	}
-//	start = atof(args[1]);
-//
-//	if (start < endv && step > 0.0f)
-//	{
-//		be_greater_ = 1;
-//	}
-//	else if (start > endv && step < 0)
-//	{
-//		be_greater_ = 0;
-//	}
-//	else
-//	{
-//		delete_list(items);
-//		li_error("bad step", -2);
-//	}
-//
-//	int iter_field_index = search_field_in_Lily_ui(args[0]);
-//	need_delete_field_ = 0;
-//	if (iter_field_index < 0)
-//	{
-//		iter_field_index = public_a_new_field(args[0], 'f', start);
-//		need_delete_field_ = 1;
-//		if (iter_field_index < 0) // not create new field
-//		{
-//			delete_list(items);
-//			//release_all();
-//			fun_exit();
-//			lily_out("\aerror -12:build new field failed\n");
-//			li_error("apply filed", -12);
-//		}
-//		iter_field = li_fields + iter_field_index;
-//	}
-//	else
-//	{
-//		iter_field = li_fields + iter_field_index;
-//		switch (iter_field->type)
-//		{
-//		case 'f':
-//			*(float*)(iter_field->ref) = start;
-//			break;
-//		case 'd':
-//			*(int*)(iter_field->ref) = start;
-//			break;
-//		default:
-//			delete_list(items);
-//			li_error("bad field", -5);
-//			break;
-//		}
-//	}
-//
-//	delete_list(items);
-//	add_hijack(hijackor_for_end);
-//	in_filling = 1;
-//	for_cmd_lines = new_list(sizeof(str), 4);
-//	// create successful
-//	//push it to stack
-//
-//	ForItem_def* area = for_area_stack + for_stack_count;
-//	area->iter_field = iter_field;
-//	area->for_cmd_lines = for_cmd_lines;
-//	// area->start_val = start;
-//	area->end_val = endv;
-//	area->step_val = step;
-//	area->now_at = 0;
-//	area->need_delete_field = need_delete_field_;
-//	area->be_greater = be_greater_;
-//
-//	for_stack_count++;
-//	update_for_area();
-//
-//	wait_for_end_count = 1;
-//#ifdef for_show_detial
-//	lily_out(":");
-//#endif // for_show_detial
-//	return 0;
-//}

@@ -1,8 +1,10 @@
 
-#include "Lily.h"
-#include "Lily_basic.h"
-#include "Lily_tasks.h"
-#include "Lily_ui.h"
+#ifdef in_PC
+#include"Lily_help.h"
+#else
+#include"Lily_help.h"
+#endif // in_PC
+
 
 #ifdef Tasks_using_pool
 Tasks_def tasks[Tasks_LEN];
@@ -190,11 +192,16 @@ void run_tasks()
 #endif 
 #ifdef Tasks_using_queue
 		i = rear;
-
 		while (front != i)
 		{
-
-			if (tasks[front]())addTask(tasks[front]);
+			if (!tasks_[front])
+			{
+				lily_out("null ptr");
+				if (++front >= Tasks_LEN)
+					front = 0;
+				continue;
+			}
+			if (tasks[front]()==1)addTask_(tasks[front]);
 			if (++front == Tasks_LEN)
 				front = 0;
 		}
@@ -223,7 +230,7 @@ int task_mointor()
 }
 
 
-#define queue_len 32
+#define queue_len 16
 static TasksArg_def fs_arg[queue_len];
 static void* args[queue_len];
 static char queue_front = 0, queue_back = 0;

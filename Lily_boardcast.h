@@ -1,6 +1,8 @@
-#pragma once
-#include "Lily.h"
-#include "Lily_basic.h"
+#ifndef Lily_boardcast
+#define Lily_boardcast
+
+//#include "Lily_tasks.h"
+//#include "Lily_basic.h"
 #define boardcast_recievers_number 5
 typedef struct
 {
@@ -34,3 +36,5 @@ extern Lily_timers lily_timers;
 #define Hz(x) (40/x)
 #define Second(s) (40*s)
 void lily_tick();
+
+#endif

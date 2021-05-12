@@ -1,11 +1,14 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <string.h>
-#include "Lily.h"
-#include "Lily_basic.h"
 #ifdef in_PC
+#define _CRT_SECURE_NO_WARNINGS
+#include "Lily_help.h"
+#include <string.h>
 #include <iostream>
 using namespace std;
 int new_count = 0;
+#else
+#include <string.h>
+#include <stdlib.h>
+#include "Lily_help.h"
 #endif // in_PC
 
 char str_startwith(char *s, char *cmd)
@@ -59,14 +62,14 @@ char str_equal(const char *s, const char *cmd)
 	a = s[i];
 	b = cmd[i];
 
-	if (a == '\0')//b!=0, ahi = ahi[12]
+	if (a == '\0') //b!=0, ahi = ahi[12]
 	{
-		if(isA(b)||isD(b)||b=='_')
+		if (isA(b) || isD(b) || b == '_')
 			return 0;
 		return i;
 	}
 	//b=='\0'
-	if (isA(a)||isD(a)||a=='_')
+	if (isA(a) || isD(a) || a == '_')
 		return 0;
 	// if ('0' <= a && a <= '9')
 	// 	return 0;
@@ -82,12 +85,12 @@ int str_index(char *s, char c)
 
 	return -1;
 }
-int str_index_right(char* s, char c)
+int str_index_right(char *s, char c)
 {
 	int i;
 	int n = strlen(s);
 
-	for (i = n-1; i; i--)
+	for (i = n - 1; i; i--)
 		if (s[i] == c)
 			return i;
 	if (s[i] == c)
@@ -150,6 +153,7 @@ char str_replace_by_str(char *s, const char *from, char to)
 
 	return times;
 }
+
 // '-123.45', '+13.890'
 int str_is_numeric(char *name)
 {
@@ -396,6 +400,7 @@ float str_to_float(char *s)
 	else
 		return (integer + decimal);
 }
+
 float *get_nums_from_rx(char *rs, int *length_back)
 {
 	static float nums[10];
@@ -429,7 +434,7 @@ float *get_nums_from_rx(char *rs, int *length_back)
 				integer *= 10.0f;
 				integer += (c - '0');
 			}
-			last_is_numeric = True;
+			last_is_numeric = true;
 			continue;
 		}
 		// not numeric
@@ -562,6 +567,7 @@ int init_list(Lily_List *list, unsigned int unit_size2, unsigned int init_cap)
 	new_count++;
 	cout << "#" << new_count << "#";
 #endif // in_PC
+
 	if (list->content == NULL)
 		return 1;
 	list->cap = init_cap;
@@ -767,7 +773,7 @@ int str_wrap(char *s, char c)
 }
 int str_wrap_by_str(char *s, char *cs)
 {
-	int i,j;
+	int i, j;
 	while (*cs != '\0')
 	{
 		i = 0;

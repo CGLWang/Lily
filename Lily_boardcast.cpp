@@ -1,6 +1,9 @@
-#include "Lily_boardcast.h"
-#include "Lily_tasks.h"
-#include "Lily_basic.h"
+#ifdef in_PC
+#include"Lily_help.h"
+#else
+#include"Lily_help.h"
+#endif // in_PC
+
 
 void boardcast_from(Boardcast *b)
 {

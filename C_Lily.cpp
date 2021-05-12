@@ -8,10 +8,11 @@
 #include <conio.h>
 #include <windows.h>
 
-#include "Lily.h"
-#include "Lily_tasks.h"
-#include "Lily_ui.h"
-#include "Lily_boardcast.h"
+#include"Lily_help.h"
+//#include "Lily.h"
+//#include "Lily_tasks.h"
+//#include "Lily_ui.h"
+//#include "Lily_boardcast.h"
 using namespace std;
 unsigned int li_millis()
 {
@@ -73,6 +74,24 @@ int main()
     public_a_cmd_link("cl4", (Arg_Tasks_def)void_fun4);
     public_a_fun_link("f2", f2);
     public_a_fun_link_n("f4", f4,4);
+
+    float xs[4]={100,200,300,400};
+    int ys[4]={4,3,2,1};
+    char cs[16]="hello";
+    public_a_var_ref("xs",&xs,'F');
+    public_a_var_ref("ys",&ys,'D');
+    public_a_var_ref("cs",&cs,'C');
+    float a;
+    int b;
+    char c;
+    public_a_var_ref("a",&xs,'f');
+    public_a_var_ref("b",&ys,'d');
+    public_a_var_ref("c",&cs,'c');
+    float kp;
+    float ki;
+    float kd;
+    public_a_var_ref("k",&kp,'F');
+
 	/*Cmd_def help;
 	help.cmd = (char*)"text";
 	help.annotation = (char*)"set fields";

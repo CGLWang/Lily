@@ -1,4 +1,15 @@
-#pragma once
+#ifndef LILY_BASIC
+#define LILY_BASIC
+
+#ifndef in_PC
+typedef char bool;
+#define false 0
+#define true 1
+#endif
+
+#define True 1
+#define False 0
+
 #define isUpper(c) ('A' <= c && c <= 'Z')
 #define isLower(c) ('a' <= c && c <= 'z')
 #define toUpper(c) (c&~0x20)
@@ -29,7 +40,6 @@ char** get_paras_from_rx(char* rx, int* len);
 
 void limit_to(float* x, float max);
 void limit_from_to(float* x, float lower, float upper);
-
 
 
 typedef struct
@@ -90,3 +100,5 @@ int assign_li_string(Li_String li, char* source);
 
 int str_wrap(char *s, char c);
 int str_wrap_by_str(char *s, char *cs);
+
+#endif // !LILY_BASIC

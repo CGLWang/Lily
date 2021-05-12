@@ -1,16 +1,23 @@
-#include "Lily_ui.h"
-#include "Lily_boardcast.h"
-#include "Lily_tasks.h"
-#include "shell.h"
 #ifdef in_PC
-#include <iostream>
-using namespace std;
+#include "Lily_help.h"
 extern int new_count;
+
+#else
+
+#include <stdlib.h>
+#include <stdio.h>
+// #include "main.h"
+#include <string.h>
+#include "cmsis_os.h"
+#include "FreeRTOS.h"
+#include "Lily_help.h"
+
 #endif // in_PC
+
 char rx[256];
 unsigned char ri, hi;
 char tx[64];
-unsigned char ti;
+// unsigned char ti;
 
 Lily_cmds_def lily_ui; //a value is copied, so a cmd or field can be add in a stack call
 
@@ -47,8 +54,8 @@ int get_cmd_from_rx()
 #ifdef in_debug
 	if (i == len)
 		lily_out("cmd too long");
-	if (hi + 1 != ri) //read done
-		lily_out("cmd queue error");
+		// if (hi + 1 != ri) //read done
+		// 	lily_out("cmd queue error");
 #endif // in_debug
 
 	cmd[i] = '\0';
@@ -60,72 +67,28 @@ int get_cmd_from_rx()
 #undef len
 }
 
+#ifdef in_PC
 float open_time = 0;
-//int excute_cmd2()
-//{
-//	float t = lily_millis();
-//	if (t < open_time)
-//		return 1; // go again
-//
-//	char* rx;
-//	if (lily_hooks_cmd_hook == NULL)
-//		rx = get_cmd_from_rx();
-//	else
-//	{
-//		rx = lily_hooks_cmd_hook;
-//		lily_hooks_cmd_hook = NULL;
-//	}
-//
-//
-//	// haijcked ?
-//	if (stack_top)
-//	{
-//		//Li_List list = str_split(rx, ' ');
-//		//char return_code = ui_stack[stack_top](list->count, (char**)(list->content));
-//		char return_code = ui_stack[stack_top](1, &rx);
-//		if (return_code == 0)// 0:done, -1:error
-//			stack_top--;
-//		if (!stack_top)
-//		{
-//			lily_ui.hijacked = false;
-//		}
-//		//delete_list(list);
-//		return 0;
-//	}
-//
-//	while (*rx == ' ')
-//		rx++;
-//	if (*rx == '\0')
-//	{
-//		if (lily_hooks_cmd_done != NULL)
-//			addTask_(lily_hooks_cmd_done);
-//		return -1;
-//	}
-//
-//	int code;
-//	typedef int(*shell_do_def)(char*);
-//	static shell_do_def shell_do[] = { shell_do_cmd,shell_do_fun,shell_do_cal,shell_do_fields,shell_do_notFound };
-//	for (int i = 0; i < 5; i++)
-//	{
-//		code = (shell_do[i])(rx);
-//		if (code == 0)continue;
-//		break;
-//	}
-//	if (code < 0)
-//	{
-//		sprintf(tx, "error(%d)\n", code);
-//		lily_out(tx);
-//	}
-//	if (lily_hooks_cmd_done != NULL)
-//		addTask_(lily_hooks_cmd_done);
-//	return 0;
-//}
+#else
+int open_time = 0;
+#endif
 
 int lily_do(char *rx)
 {
-	float t = lily_millis();
+#ifdef in_PC
+	int t = lily_millis();
 	if (t < open_time)
 		return 1; // go again
+#else
+	int t = lily_millis();
+	while (t < open_time)
+	{
+		lily_Delay(1);
+		t = lily_millis();
+		// return 1; // go again
+	}
+#endif
+
 #ifdef in_debug
 	if (rx == NULL)
 	{
@@ -180,7 +143,11 @@ int lily_do(char *rx)
 
 	int code;
 	typedef int (*shell_do_def)(char *);
+#ifdef in_PC
 	static shell_do_def shell_do[] = {shell_do_cmd, shell_do_fun, shell_do_cal, shell_do_var, shell_do_notFound};
+#else
+	static shell_do_def shell_do[] = {shell_do_fun, shell_do_cmd, shell_do_cal, shell_do_fields, shell_do_notFound};
+#endif
 	char rx_back[32];
 	for (int i = 0; i < 5; i++)
 	{
@@ -198,12 +165,10 @@ int lily_do(char *rx)
 		lily_out(rx);
 		sprintf(tx, "\a\nerror(%d):", code);
 		lily_out(tx);
-		if(lily_error_msg!=NULL)
+		if (lily_error_msg != NULL)
 			lily_out((char *)lily_error_msg);
 		lily_out("\n");
 	}
-	//if (lily_hooks_cmd_done != NULL)
-	//	addTask_(lily_hooks_cmd_done);
 	if (have_listener)
 	{
 		if (code < 0 || !(code & Lily_cmd_do_not_notify))
@@ -256,19 +221,7 @@ int search_cmd_in_Lily_ui(char *item)
 	}
 	return -1;
 }
-// int search_field_in_Lily_ui(char *item)
-// {
-// 	int i, n;
-// 	n = lily_ui.fields->count;
-// 	Field fields = (Field)(lily_ui.fields->content);
-// 	for (i = 0; i < n; i++)
-// 	{
-// 		if (!str_equal(item, fields[i].name))
-// 			continue;
-// 		return i;
-// 	}
-// 	return -1;
-// }
+
 int search_fun_in_Lily_ui(char *item)
 {
 	int i, n;
@@ -305,21 +258,6 @@ int help(int nargin, char **arg)
 			lily_out(tx);
 			continue;
 		}
-		// Field q = li_fields; // (Field_def*)(lily_ui.fields->content);
-		// Var q = li_vars;
-		// index = search_field_in_Lily_ui(item);
-		// if (index >= 0)
-		// {
-		// 	char s[] = "f";
-		// 	sprintf(tx, ">>%s:%s, type:", q[index].name, q[index].annotation);
-		// 	lily_out(tx);
-		// 	s[0] = q[index].type;
-		// 	lily_out(s);
-		// 	lily_out("\n");
-		// 	//sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
-		// 	//lily_cout(tx);
-		// 	continue;
-		// }
 		lily_out(">>not found help of:");
 		lily_out(item);
 		lily_out("\n");
@@ -342,13 +280,6 @@ int help(int nargin, char **arg)
 		lily_out(tx);
 	}
 
-	// Field_def *q = (Field_def *)(lily_ui.fields->content);
-	// lily_out(">fields:\n");
-	// for (int i = 0; i < lily_ui.fields->count; i++)
-	// {
-	// 	sprintf(tx, "%s\n", q[i].name);
-	// 	lily_out(tx);
-	// }
 	return 0;
 }
 
@@ -387,7 +318,6 @@ int delete_field(int n, char **arg)
 	// if (n < 2 )return -1;
 	for (; i < n; i++)
 	{
-		// int index = search_field_in_Lily_ui(arg[i]);
 		int index = search_var_in_Lily_ui(arg[i]);
 		if (index < 0)
 		{
@@ -397,11 +327,10 @@ int delete_field(int n, char **arg)
 		}
 		Var var = li_vars + index;
 		if (var->isb)
-			return -3;
-		// Field_def *q = (Field_def *)(lily_ui.fields->content);
-		// if (q[index].annotation[0] == '_')
-		// 	return -3; //protected
-		// free(q[index].name);
+		{
+			li_error("protected", -3);
+		}
+
 		free(cast(var->name, void *));
 #ifdef in_PC
 		new_count--;
@@ -415,15 +344,6 @@ int delete_field(int n, char **arg)
 			cout << "#" << new_count << "#";
 #endif // in_PC
 		}
-		// free(q[index].ref);
-// #ifdef in_PC
-// 		new_count--;
-// 		cout << "#" << new_count << "#";
-// #endif // in_PC                          \
-	//if (q[index].annotation[0] != '_') \
-	//	free(q[index].name);              \
-	//if (q[index].type == 's')          \
-	//delete_li_string((Li_String)(q[index].ref));
 
 		list_remove_at(lily_ui.vars, index);
 	}
@@ -441,22 +361,17 @@ int whos(int nargin, char **arg)
 		char *item = NULL;
 		item = arg[now];
 
-		//Field_def *q = (Field_def *)(lily_ui.fields->content);
 		Var q = li_vars;
 		int n = lily_ui.vars->count;
 		for (int i = 0; i < n; i++)
 		{
 			if (str_equal(item, q[i].name))
 			{
-				//char s[] = "f";
 				if (q[i].isa)
 					sprintf(tx, ">>%s type:%c%c*%d\n", q[i].name, q[i].isb ? '_' : ' ', q[i].type, q[i].len);
 				else
 					sprintf(tx, ">>%s type:%c%c\n", q[i].name, q[i].isb ? '_' : ' ', q[i].type);
 				lily_out(tx);
-				/*s[0] = q[i].type;
-				lily_out(s);
-				lily_out("\n");*/
 				hit = true;
 				break;
 			}
@@ -481,42 +396,32 @@ int whos(int nargin, char **arg)
 		lily_out(tx);
 		var_to_string(tx, q + i, 0);
 
-		/*switch (q[i].type)
-		{
-		case 's':
-			sprintf(tx, "%s\n", ((char *)(q[i].ref)));
-			break;
-		case 'S':
-			sprintf(tx, "%s\n", ((Li_String)q[i].ref)->str);
-			break;
-		case 'f':
-			sprintf(tx, "%f\n", *((float *)q[i].ref));
-			break;
-		case 'd':
-			sprintf(tx, "%d\n", *((int *)q[i].ref));
-			break;
-		default:
-			break;
-		}*/
 		lily_out(tx);
 		lily_out("\n");
 	}
 	return 0;
 }
 
+#ifdef in_PC
 int system(int n, char **arg)
+#else
+int system_cmd(int n, char **arg)
+#endif
 {
 	//task
-	lily_out("tasks:");
-	int_to_string(hasTask, tx);
-	lily_out(tx);
-	lily_out("-");
+	// lily_out("tasks:");
+	// int_to_string(hasTask,tx);
+	// lily_out(tx);
+	// lily_out("-");
 	int_to_string((rear + Tasks_LEN - front) % Tasks_LEN, tx);
+	lily_out(tx);
+	int_to_string(lily_timers.timer_works->count, tx);
 	lily_out(tx);
 	lily_out("\n");
 	return 0;
 }
 
+#ifdef in_PC
 int delay_cmd(int n, char **arg)
 {
 	if (n == 1)
@@ -534,6 +439,25 @@ int delay_cmd(int n, char **arg)
 	}
 	return -2;
 }
+#else
+int delay_cmd(int n, char **arg)
+{
+	if (n == 1)
+	{
+		open_time = lily_millis() + 1000;
+		return 1;
+	}
+	else if (n == 2)
+	{
+		int t = atoi(arg[1]);
+		if (t <= 0)
+			return -1;
+		open_time = lily_millis() + t;
+		return 1;
+	}
+	return -2;
+}
+#endif
 //creat and public a cmd with defaults
 //just provide a name and fun ptr of this cmd
 int public_a_cmd_link(const char *name, Arg_Tasks_def link)
@@ -599,76 +523,6 @@ int joint_args(int n, char **args)
 	}
 	return len;
 }
-
-// creat a new li_string to save [s]
-// int public_a_new_string_field(char *name, char *s)
-// {
-// 	Field_def fed;
-// 	fed.annotation = (char *)"UserField";
-// 	fed.name = (char *)malloc(strlen(name) + 1);
-// #ifdef in_PC
-// 	new_count++;
-// 	cout << "#" << new_count << "#";
-// #endif // in_PC
-// 	if (fed.name == NULL)
-// 		return -1;
-// 	strcpy(fed.name, name);
-// 	//Li_String li = new_li_string_by(s);
-// 	//if (li == NULL)return -1;
-// 	void *p = new_string_by(s);
-// 	if (p == NULL)
-// 		return -2;
-// 	fed.ref = p;
-// 	fed.type = 's';
-// 	return public_field(fed);
-// }
-// when use this function to public a field
-// note:
-// it will apply a new memory to save [name] and [val], so when delete a field, free that first
-// this publication is only support a int and float field, for a string field, using [public_a_new_string_field]
-// return the index of new field, if it<0, error occured
-// int public_a_new_field(char *name, char type, float val)
-// {
-// 	Field_def fed;
-// 	fed.annotation = (char *)"UserField";
-// 	fed.name = (char *)malloc(strlen(name) + 1);
-// #ifdef in_PC
-// 	new_count++;
-// 	cout << "#" << new_count << "#";
-// #endif // in_PC
-// 	if (fed.name == NULL)
-// 		return -1;
-// 	strcpy(fed.name, name);
-// 	void *li = NULL;
-// 	switch (type)
-// 	{
-// 	case 'f':
-// 		li = malloc(sizeof(float));
-// #ifdef in_PC
-// 		new_count++;
-// 		cout << "#" << new_count << "#";
-// #endif // in_PC
-// 		if (li == NULL)
-// 			return -1;
-// 		*((float *)li) = val;
-// 		break;
-// 	case 'd':
-// 		li = malloc(sizeof(int));
-// #ifdef in_PC
-// 		new_count++;
-// 		cout << "#" << new_count << "#";
-// #endif // in_PC
-// 		if (li == NULL)
-// 			return -1;
-// 		*((int *)li) = (int)val;
-// 		break;
-// 	default:
-// 		break;
-// 	}
-// 	fed.ref = li;
-// 	fed.type = type;
-// 	return public_field(fed);
-// }
 
 // wait key for n times
 int hijackor_wait_key(int n, char **s)
@@ -771,33 +625,6 @@ int cmd_hijack_sleep(int n, char **arg)
 		{
 			li_error("field miss", -2);
 		}
-
-		// if (str_is_numeric(arg[1]))
-		// {
-		// 	sleep_time = atoi(arg[1]);
-		// }
-		// else
-		// {
-		// 	// int index = search_field_in_Lily_ui(arg[1]);
-		// 	int index = search_var_in_Lily_ui(arg[1]);
-		// 	if (index < 0)
-		// 	{
-		// 		li_error("field miss", -2);
-		// 	}
-		// 	Field fed = li_fields + index;
-		// 	switch (fed->type)
-		// 	{
-		// 	case 'f':
-		// 		sleep_time = *(float *)(fed->ref);
-		// 		break;
-		// 	case 'd':
-		// 		sleep_time = *(int *)(fed->ref);
-		// 		break;
-		// 	default:
-		// 		li_error("field type not match", -3);
-		// 		//				break;
-		// 	}
-		// }
 	}
 
 	if (sleep_time < 0.026f)
@@ -808,6 +635,7 @@ int cmd_hijack_sleep(int n, char **arg)
 	return Lily_cmd_do_not_notify;
 }
 
+//Program Size: Code=33552 RO-data=940 RW-data=488 ZI-data=23216
 //Var operations
 
 // add a static var

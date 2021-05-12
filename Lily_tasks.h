@@ -1,5 +1,12 @@
-#pragma once
-#include "Lily.h"
+#ifndef LILY_TASK
+#define LILY_TASK
+
+#define end 0
+#define again 1
+typedef int(*Tasks_def)();//return 0 meas task ended
+typedef int(*TasksArg_def)(void*);//add a Task with a parameter
+typedef int (*Arg_Tasks_def)(int argc, char* argv[]);
+
 #ifdef Tasks_using_pool
 #define Tasks_LEN 32
 extern Tasks_def tasks[Tasks_LEN];
@@ -25,7 +32,6 @@ extern unsigned int front, rear;
 #define endTaskAt_ endTaskAt2
 #define hadTask_ hadTask2
 #else
-#define Tasks_def Tasks2_def
 #define tasks_ tasks
 #define hasTask_ hasTask
 #define addTask_ addTask
@@ -47,3 +53,5 @@ void run_tasks();
 int task_mointor();
 
 void addTaskArg(TasksArg_def f, void* arg);
+
+#endif // LILY_TASK
