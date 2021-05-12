@@ -82,8 +82,8 @@ int main()
 
     int aint[16] = {0};
     float bf[16] = { 0.0f };
-    public_a_field_ref("bf", bf);
-    public_a_field_ref_type("ai", aint, 'd');
+    //public_a_field_ref("bf", bf);
+    //public_a_field_ref_type("ai", aint, 'd');
 
     public_a_cmd_link("text", cmd_test1);
     public_a_timer(timer0, 30);

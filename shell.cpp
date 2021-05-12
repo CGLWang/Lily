@@ -78,126 +78,126 @@ typedef char *string_;
 // return values in float type
 // return NULL if in error
 // note: delete list int time
-Li_List valcues_of_fields(Li_List list)
-{
-	typedef char *string_;
-	string_ *item_strs = list_content(list, string_);
-	int n = list->count;
-	Li_List values = new_li_cap(float, n);
-	for (int i = 0; i < n; i++)
-	{
-		string_ name = item_strs[i];
-		float val = value_from_string_or_field(name);
-		if (isnan(val))
-		{
-			delete_list(values);
-			return NULL;
-		}
-		li_add(values, val);
-
-		// if (str_is_name(name))
-		// {
-		// 	int index = search_field_in_Lily_ui(name);
-		// 	if (index < 0)
-		// 	{
-		// 		delete_list(values);
-		// 		return NULL;
-		// 	}
-		// 	Field fields = li_fields;
-		// 	char type = fields[index].type;
-		// 	float val;
-		// 	if (type == 'f')
-		// 	{
-		// 		val = *((float *)(fields[index].ref));
-		// 	}
-		// 	else if (type == 'd')
-		// 	{
-		// 		val = *((int *)(fields[index].ref));
-		// 	}
-		// 	else
-		// 	{
-		// 		delete_list(values);
-		// 		return NULL;
-		// 	}
-		// 	li_add(values, val);
-		// }
-		// else if (str_is_numeric(name))
-		// {
-		// 	float val = atof(name);
-		// 	li_add(values, val);
-		// }
-		// else
-		// {
-		// 	delete_list(values);
-		// 	return NULL;
-		// }
-	}
-	return values;
-}
+//Li_List valcues_of_fields(Li_List list)
+//{
+//	typedef char *string_;
+//	string_ *item_strs = list_content(list, string_);
+//	int n = list->count;
+//	Li_List values = new_li_cap(float, n);
+//	for (int i = 0; i < n; i++)
+//	{
+//		string_ name = item_strs[i];
+//		float val = value_from_string_or_field(name);
+//		if (isnan(val))
+//		{
+//			delete_list(values);
+//			return NULL;
+//		}
+//		li_add(values, val);
+//
+//		// if (str_is_name(name))
+//		// {
+//		// 	int index = search_field_in_Lily_ui(name);
+//		// 	if (index < 0)
+//		// 	{
+//		// 		delete_list(values);
+//		// 		return NULL;
+//		// 	}
+//		// 	Field fields = li_fields;
+//		// 	char type = fields[index].type;
+//		// 	float val;
+//		// 	if (type == 'f')
+//		// 	{
+//		// 		val = *((float *)(fields[index].ref));
+//		// 	}
+//		// 	else if (type == 'd')
+//		// 	{
+//		// 		val = *((int *)(fields[index].ref));
+//		// 	}
+//		// 	else
+//		// 	{
+//		// 		delete_list(values);
+//		// 		return NULL;
+//		// 	}
+//		// 	li_add(values, val);
+//		// }
+//		// else if (str_is_numeric(name))
+//		// {
+//		// 	float val = atof(name);
+//		// 	li_add(values, val);
+//		// }
+//		// else
+//		// {
+//		// 	delete_list(values);
+//		// 	return NULL;
+//		// }
+//	}
+//	return values;
+//}
 
 //get value from a string
 //support like:
 //a
 //123.4
 //a[1], field type 'f,d,s'
-float value_from_string_or_field(string_ name)
-{
-	float val;
-	if (str_is_name(name))
-	{
-		int index = search_field_in_Lily_ui(name);
-		if (index < 0)
-		{
-			return NAN;
-		}
-		int idx1 = str_index(name, '[');
-		if (idx1 < 0)
-		{
-			return NAN;
-		}
-		int idx2 = str_index(name, ']');
-		if (idx2 < 0)
-		{
-			return NAN;
-		}
-		name[idx2] = '\0';
-		if (!str_is_numeric(name + idx1 + 1))
-			return NAN;
-		int offs = atoi(name + idx1 + 1);
+// float value_from_string_or_field(string_ name)
+// {
+// 	float val;
+// 	if (str_is_name(name))
+// 	{
+// 		int index = search_field_in_Lily_ui(name);
+// 		if (index < 0)
+// 		{
+// 			return NAN;
+// 		}
+// 		int idx1 = str_index(name, '[');
+// 		if (idx1 < 0)
+// 		{
+// 			return NAN;
+// 		}
+// 		int idx2 = str_index(name, ']');
+// 		if (idx2 < 0)
+// 		{
+// 			return NAN;
+// 		}
+// 		name[idx2] = '\0';
+// 		if (!str_is_numeric(name + idx1 + 1))
+// 			return NAN;
+// 		int offs = atoi(name + idx1 + 1);
 
-		Field fields = li_fields;
-		char type = fields[index].type;
-		if (offs != 0 && isLower(type))
-			return NAN;
-		if (isUpper(type))
-			type += 32; //to lower
-		if (type == 'f')
-		{
-			val = ((float *)(fields[index].ref))[offs];
-		}
-		else if (type == 'd')
-		{
-			val = ((int *)(fields[index].ref))[offs];
-		}
-		else if (type == 's')
-		{
-			val = ((char *)(fields[index].ref))[offs];
-		}
-		else
-		{
-			return NAN;
-		}
-	}
-	else if (str_is_numeric(name))
-	{
-		val = atof(name);
-	}
-	else
-	{
-		return NAN;
-	}
-	return val;
-}
+// 		Field fields = li_fields;
+// 		char type = fields[index].type;
+// 		if (offs != 0 && isLower(type))
+// 			return NAN;
+// 		if (isUpper(type))
+// 			type += 32; //to lower
+// 		if (type == 'f')
+// 		{
+// 			val = ((float *)(fields[index].ref))[offs];
+// 		}
+// 		else if (type == 'd')
+// 		{
+// 			val = ((int *)(fields[index].ref))[offs];
+// 		}
+// 		else if (type == 's')
+// 		{
+// 			val = ((char *)(fields[index].ref))[offs];
+// 		}
+// 		else
+// 		{
+// 			return NAN;
+// 		}
+// 	}
+// 	else if (str_is_numeric(name))
+// 	{
+// 		val = atof(name);
+// 	}
+// 	else
+// 	{
+// 		return NAN;
+// 	}
+// 	return val;
+// }
 float shell_calculate_expression(char *rx)
 {
 	//step1: get objects attending caculation
@@ -250,7 +250,7 @@ float shell_calculate_expression(char *rx)
 #endif // in_PC
 		return NAN;
 	}
-	Li_List values_ = valcues_of_fields(list);
+	Li_List values_ = valcues_of_vars(list);
 	delete_list(list);
 	if (values_ == NULL)
 	{
@@ -339,7 +339,7 @@ int shell_cal_exp_cmd(int n, char **arg)
 		if (isnan(result))
 			return -3;
 
-		int index = search_field_in_Lily_ui(arg[1]);
+		/*	int index = search_field_in_Lily_ui(arg[1]);
 		if (index < 0)
 		{
 			index = public_a_new_field(arg[1], 'f', 0.0f);
@@ -359,6 +359,43 @@ int shell_cal_exp_cmd(int n, char **arg)
 		{
 			lily_error_msg = "field is not numeric";
 			return -4;
+		}*/
+
+		//int idx1 = str_index(arg[1], '[');
+		//int idx2 = str_index_right(arg[1], ']');
+		int index = search_var_in_Lily_ui(arg[1]);
+		
+		int at;
+		if (index < 0)
+		{
+			index = public_a_new_var(arg[1], 'f', 0);
+		}
+		else
+		{
+			at = ebrace_value_from_string(arg[1]);
+			if (at < 0)
+			{
+				li_error("index error", -53);
+			}
+		}
+		Var var = li_vars + index;
+		int rtc = 0;
+		if (var->type == 'f')
+		{
+			rtc = set_value_of_var(var, at, to_voidf(result));
+		}
+		else if (var->type == 'd')
+		{
+			rtc = set_value_of_var(var, at, to_void((int)result));
+		}
+		else
+		{
+			lily_error_msg = "field is not numeric";
+			return -4;
+		}
+		if (rtc < 0)
+		{
+			li_error("assign error", rtc);
 		}
 
 		lily_out(arg[1]);
@@ -381,28 +418,33 @@ int shell_do_cmd(char *rx)
 	Li_List list = str_split(rx, ' ');
 	hit = list->count;
 	string_ *para = (char **)(list->content);
+	char*tx1 = tx;
 	for (int i = 0; i < hit; i++)
 	{
 		if (para[i][0] != '$')
 			continue;
 		//replace para[i] to the field content
-		int index = search_field_in_Lily_ui(para[i] + 1);
+		int index = search_var_in_Lily_ui(para[i] + 1);
 		if (index < 0)
 		{
 			delete_list(list);
 			lily_error_msg = "\'$\' false used, field not exists";
 			return -1; // index out
 		}
-		Field fields = li_fields;
-		Field field = fields + index;
+		int at = ebrace_value_from_string(para[i]);
+		var_to_string(tx1,li_vars+index,at);
+		
+		// Field fields = li_fields;
+		// Field field = fields + index;
 		//if (field->type != 's')
 		//{
 		//	delete_list(list);
 		//	return -2;//type error
 		//}
 		//para[i] = ((Li_String)field->ref)->str;
-		field_to_string(tx, field, 0);
-		para[i] = tx; // (char*)field->ref;
+		// field_to_string(tx, field, 0);
+		para[i] = tx1; // (char*)field->ref;
+		tx1 += strlen(tx1)+1;
 	}
 	return_code = (cmd->todo)(list->count, (char **)(list->content));
 	delete_list(list);
@@ -418,17 +460,17 @@ int shell_do_fun(char *rx)
 	int hit1;
 	char *ro = rx;
 	hit1 = str_contains(rx, '=');
-	Field assign_field = NULL;
+	Var assign_field = NULL;
 	if (hit1)
 	{
 		rx[hit1 - 1] = '\0';
-		int n = search_field_in_Lily_ui(rx);
+		int n = search_var_in_Lily_ui(rx);
 		if (n < 0)
 		{
 			// rx[hit1 - 1] = '=';
 			return 0;
 		}
-		assign_field = li_fields + n;
+		assign_field = li_vars + n;
 		rx += hit1;
 	}
 	int hit = search_fun_in_Lily_ui(rx);
@@ -480,35 +522,43 @@ int shell_do_fun(char *rx)
 	int error = 0;
 	for (int i = 1; i < hit; i++) //skip the first one
 	{
-		if (str_is_numeric(para[i]))
-		{
-			float num = str_to_float(para[i]);
-			nums[i] = num;
-			continue;
-		}
-		//replace para[i] to the field content
-		int index = search_field_in_Lily_ui(para[i]);
-		if (index < 0)
+		nums[i] = value_from_string_or_var(para[i]);
+		if(isnan(nums[i]))
 		{
 			error = -1;
-			lily_error_msg = "field not exists";
+			lily_error_msg = "bad value";
 			break;
 		}
-		Field field = li_fields + index;
-		if (field->type == 'f')
-		{
-			nums[i] = *((float *)field->ref);
-		}
-		else if (field->type == 'd')
-		{
-			nums[i] = *((int *)field->ref);
-		}
-		else
-		{
-			error = -3;
-			lily_error_msg = "field is not numeric";
-			break;
-		}
+		// if (str_is_numeric(para[i]))
+		// {
+		// 	float num = str_to_float(para[i]);
+		// 	nums[i] = num;
+		// 	continue;
+		// }
+		// //replace para[i] to the field content
+		// int index = search_var_in_Lily_ui(para[i]);
+		// if (index < 0)
+		// {
+		// 	error = -1;
+		// 	lily_error_msg = "field not exists";
+		// 	break;
+		// }
+
+		// Var field = li_vars + index;
+		// if (field->type == 'f')
+		// {
+		// 	nums[i] = *((float *)field->ref);
+		// }
+		// else if (field->type == 'd')
+		// {
+		// 	nums[i] = *((int *)field->ref);
+		// }
+		// else
+		// {
+		// 	error = -3;
+		// 	lily_error_msg = "field is not numeric";
+		// 	break;
+		// }
 	}
 	if (error != 0)
 	{
@@ -653,143 +703,143 @@ int shell_do_cal(char *rx)
 // a, if a is a field
 // a = b[i]
 //a[d] = b[i]
-int shell_do_fields(char *rx)
-{
-	//strcpy(tx, rx);
-	char *cmd = rx;
-	int index = str_index(cmd, '=');
-	str_replace(cmd, '=', ' ');
-	str_replace_by_str(cmd, "[]", ' ');
-	// split maxmmun two string: a = b
-	Li_List li = str_split(cmd, ' ');
-	int n = li->count;
-	if (n > 3) // contains too many '='
-	{
-		lily_error_msg = "too many \'=\'";
-		delete_list(li);
-		return -3;
-	}
+// int shell_do_fields(char *rx)
+// {
+// 	//strcpy(tx, rx);
+// 	char *cmd = rx;
+// 	int index = str_index(cmd, '=');
+// 	str_replace(cmd, '=', ' ');
+// 	str_replace_by_str(cmd, "[]", ' ');
+// 	// split maxmmun two string: a = b
+// 	Li_List li = str_split(cmd, ' ');
+// 	int n = li->count;
+// 	if (n > 3) // contains too many '='
+// 	{
+// 		lily_error_msg = "too many \'=\'";
+// 		delete_list(li);
+// 		return -3;
+// 	}
 
-	char **args = (char **)li->content;
-	char *val = NULL;
+// 	char **args = (char **)li->content;
+// 	char *val = NULL;
 
-	int fed_index = 0;
-	if (n == 3) //k[2]=a -> k 2  a
-	{
-		if (!str_is_numeric(args[1]))
-		{
-			lily_error_msg = "arg[1] is bad";
-			delete_list(li);
-			return -31;
-		}
-		fed_index = atoi(args[1]);
-		list_remove_at(li, 1);
-		n -= 1;
-	}
+// 	int fed_index = 0;
+// 	if (n == 3) //k[2]=a -> k 2  a
+// 	{
+// 		if (!str_is_numeric(args[1]))
+// 		{
+// 			lily_error_msg = "arg[1] is bad";
+// 			delete_list(li);
+// 			return -31;
+// 		}
+// 		fed_index = atoi(args[1]);
+// 		list_remove_at(li, 1);
+// 		n -= 1;
+// 	}
 
-	if (index > 0) // contsins '=', assign operation
-	{
-		val = args[1];
-	}
-	index = search_field_in_Lily_ui(args[0]);
+// 	if (index > 0) // contsins '=', assign operation
+// 	{
+// 		val = args[1];
+// 	}
+// 	index = search_field_in_Lily_ui(args[0]);
 
-	if (index < 0 && val == NULL) // hit miss
-	{
-		delete_list(li);
-		return 0;
-	}
+// 	if (index < 0 && val == NULL) // hit miss
+// 	{
+// 		delete_list(li);
+// 		return 0;
+// 	}
 
-	Field fields = (Field)(lily_ui.fields->content);
-	Field first_field = NULL, sencond_field = NULL;
-	if (index >= 0)
-		first_field = &(fields[index]);
+// 	Field fields = (Field)(lily_ui.fields->content);
+// 	Field first_field = NULL, sencond_field = NULL;
+// 	if (index >= 0)
+// 		first_field = &(fields[index]);
 
-	//char pattern[] = "=%f\n";
-	int code = 0;
-	if (val != NULL) // '='
-	{
-		index = search_field_in_Lily_ui(val);
-		if (index >= 0)
-		{
-			sencond_field = &fields[index];
-		}
-	}
+// 	//char pattern[] = "=%f\n";
+// 	int code = 0;
+// 	if (val != NULL) // '='
+// 	{
+// 		index = search_field_in_Lily_ui(val);
+// 		if (index >= 0)
+// 		{
+// 			sencond_field = &fields[index];
+// 		}
+// 	}
 
-	// creat new Field
-	if (first_field == NULL && val != NULL) // e.g.: newField = a
-	{
-		if (sencond_field != NULL) // creat a new field and overwrite,e.g.: newField = oldFiled
-		{
-			switch (sencond_field->type)
-			{
-			case 's':
-				code = public_a_new_string_field(cmd, (char *)(sencond_field->ref));
-				break;
-			case 'f':
-				code = public_a_new_field(cmd, sencond_field->type, *((float *)(sencond_field->ref)));
-				break;
-			case 'd':
-				code = public_a_new_field(cmd, sencond_field->type, *((int *)(sencond_field->ref)));
-				break;
-			default:
-				break;
-			}
-		}
-		else //e.g.: newField = 123
-		{
-			if (str_is_numeric(val))
-			{
-				float num = atof(val);
-				code = public_a_new_field(cmd, 'f', num);
-			}
-			else
-			{
-				code = public_a_new_string_field(cmd, val);
-			}
-		}
+// 	// creat new Field
+// 	if (first_field == NULL && val != NULL) // e.g.: newField = a
+// 	{
+// 		if (sencond_field != NULL) // creat a new field and overwrite,e.g.: newField = oldFiled
+// 		{
+// 			switch (sencond_field->type)
+// 			{
+// 			case 's':
+// 				code = public_a_new_string_field(cmd, (char *)(sencond_field->ref));
+// 				break;
+// 			case 'f':
+// 				code = public_a_new_field(cmd, sencond_field->type, *((float *)(sencond_field->ref)));
+// 				break;
+// 			case 'd':
+// 				code = public_a_new_field(cmd, sencond_field->type, *((int *)(sencond_field->ref)));
+// 				break;
+// 			default:
+// 				break;
+// 			}
+// 		}
+// 		else //e.g.: newField = 123
+// 		{
+// 			if (str_is_numeric(val))
+// 			{
+// 				float num = atof(val);
+// 				code = public_a_new_field(cmd, 'f', num);
+// 			}
+// 			else
+// 			{
+// 				code = public_a_new_string_field(cmd, val);
+// 			}
+// 		}
 
-		if (code < 0)
-		{
-			delete_list(li);
-			return code;
-		}
-		else
-		{
-			first_field = &fields[code];
-		}
-	}
-	else if (first_field != NULL && val != NULL) //reassign a field
-	{
-		if (sencond_field != NULL) // e.g.: f1 = f2
-		{
-			code = assign_field_from_field(first_field, sencond_field, fed_index);
-		}
-		else // e.g.: f1 = 123
-		{
-			code = assign_field_from_string(first_field, val, fed_index);
-		}
-		if (code < 0)
-		{
-			delete_list(li);
-			return code;
-		}
-	}
+// 		if (code < 0)
+// 		{
+// 			delete_list(li);
+// 			return code;
+// 		}
+// 		else
+// 		{
+// 			first_field = &fields[code];
+// 		}
+// 	}
+// 	else if (first_field != NULL && val != NULL) //reassign a field
+// 	{
+// 		if (sencond_field != NULL) // e.g.: f1 = f2
+// 		{
+// 			code = assign_field_from_field(first_field, sencond_field, fed_index);
+// 		}
+// 		else // e.g.: f1 = 123
+// 		{
+// 			code = assign_field_from_string(first_field, val, fed_index);
+// 		}
+// 		if (code < 0)
+// 		{
+// 			delete_list(li);
+// 			return code;
+// 		}
+// 	}
 
-	//show
-	//pattern[2] = first_field->type;
-	lily_out(first_field->name);
-	if (fed_index)
-	{
-		sprintf(tx, "[%d]", fed_index);
-		lily_out(tx);
-	}
-	tx[0] = '=';
-	field_to_string(tx + 1, first_field, fed_index);
-	lily_out(tx);
-	lily_out("\n");
-	delete_list(li);
-	return 1;
-}
+// 	//show
+// 	//pattern[2] = first_field->type;
+// 	lily_out(first_field->name);
+// 	if (fed_index)
+// 	{
+// 		sprintf(tx, "[%d]", fed_index);
+// 		lily_out(tx);
+// 	}
+// 	tx[0] = '=';
+// 	field_to_string(tx + 1, first_field, fed_index);
+// 	lily_out(tx);
+// 	lily_out("\n");
+// 	delete_list(li);
+// 	return 1;
+// }
 int shell_do_notFound(char *rx)
 {
 	lily_out("\ano cmd:\"");
@@ -798,202 +848,169 @@ int shell_do_notFound(char *rx)
 	return 1;
 }
 
-int assign_field_from_field(Field dst, Field source, int dst_offsets)
-{
-	if (dst->type == 's') //dst type is string
-	{
-		if (source->type == 's') // s->s
-		{
-			//return assign_li_string((Li_String)(dst->ref), ((Li_String)(source->ref))->str);
-			return assign_string_field(dst, (char *)(source->ref));
-		}
-		// n-> s
-		//delete_li_string((Li_String)(dst->ref));
-		free(dst->ref);
-#ifdef in_PC
-		new_count--;
-		cout << "#" << new_count << "#";
-#endif // in_PC
-		dst->type = source->type;
-		dst->ref = malloc(sizeof(float)); // note 4 byte[float and int] is ok there
-#ifdef in_PC
-		new_count++;
-		cout << "#" << new_count << "#";
-#endif // in_PC
-		memcpy(dst->ref, source->ref, sizeof(float));
-		return 0;
-	}
-	// dst type is numeric
-	//s -> n
-	if (source->type == 's')
-	{
-		if ((dst->annotation)[0] == '_')
-		{
-			return -1; //protected
-		}
-		void *p = new_string_by((char *)(source->ref));
-		if (p == NULL)
-			return -2;
-		free(dst->ref);
-#ifdef in_PC
-		new_count--;
-		cout << "#" << new_count << "#";
-#endif // in_PC \
-	//dst->ref = new_li_string_by(((Li_String)(source->ref))->str);
-		dst->ref = p;
-		dst->type = source->type;
-		return 0;
-	}
-	//n -> n
-	if ((dst->annotation)[0] == '_' && dst->type != source->type)
-	{
-		li_error("protected,type not match", -1);
-	}
+// int assign_field_from_field(Field dst, Field source, int dst_offsets)
+// {
+// 	if (dst->type == 's') //dst type is string
+// 	{
+// 		if (source->type == 's') // s->s
+// 		{
+// 			//return assign_li_string((Li_String)(dst->ref), ((Li_String)(source->ref))->str);
+// 			return assign_string_field(dst, (char *)(source->ref));
+// 		}
+// 		// n-> s
+// 		//delete_li_string((Li_String)(dst->ref));
+// 		free(dst->ref);
+// #ifdef in_PC
+// 		new_count--;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC
+// 		dst->type = source->type;
+// 		dst->ref = malloc(sizeof(float)); // note 4 byte[float and int] is ok there
+// #ifdef in_PC
+// 		new_count++;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC
+// 		memcpy(dst->ref, source->ref, sizeof(float));
+// 		return 0;
+// 	}
+// 	// dst type is numeric
+// 	//s -> n
+// 	if (source->type == 's')
+// 	{
+// 		if ((dst->annotation)[0] == '_')
+// 		{
+// 			return -1; //protected
+// 		}
+// 		void *p = new_string_by((char *)(source->ref));
+// 		if (p == NULL)
+// 			return -2;
+// 		free(dst->ref);
+// #ifdef in_PC
+// 		new_count--;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC \
+// 	//dst->ref = new_li_string_by(((Li_String)(source->ref))->str);
+// 		dst->ref = p;
+// 		dst->type = source->type;
+// 		return 0;
+// 	}
+// 	//n -> n
+// 	if ((dst->annotation)[0] == '_' && dst->type != source->type)
+// 	{
+// 		li_error("protected,type not match", -1);
+// 	}
 
-	dst->type = source->type;
-	memcpy(dst->ref, source->ref, sizeof(float));
-	memcpy((void *)((char *)(dst->ref) + dst_offsets * 4), source->ref, sizeof(float));
-	return 0;
-}
-int assign_field_from_string(Field dst, char *val, int dst_offset)
-{
-	float val_f;
-	int val_i;
-	switch (dst->type)
-	{
-	case 's':
-		return assign_string_field(dst, val);
-		break;
-	case 'S':
-		return assign_li_string((Li_String)(dst->ref), val);
-		break;
-	case 'd':
-	case 'f':
-		if (str_is_numeric(val))
-		{
-			if (dst->type == 'd')
-			{
-				val_i = atoi(val);
-				((int *)(dst->ref))[dst_offset] = val_i;
-			}
-			else
-			{
-				val_f = atof(val);
-				((float *)(dst->ref))[dst_offset] = val_f;
-			}
-		}
-		else // s -> n
-		{
-			if ((dst->annotation)[0] == '_')
-			{
-				return -1;
-			}
-			free(dst->ref);
-#ifdef in_PC
-			new_count--;
-			cout << "#" << new_count << "#";
-#endif // in_PC \
-	//dst->ref = new_li_string_by(val);
-			dst->ref = new_string_by(val);
-			dst->type = 's';
-		}
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
+// 	dst->type = source->type;
+// 	memcpy(dst->ref, source->ref, sizeof(float));
+// 	memcpy((void *)((char *)(dst->ref) + dst_offsets * 4), source->ref, sizeof(float));
+// 	return 0;
+// }
+// int assign_field_from_string(Field dst, char *val, int dst_offset)
+// {
+// 	float val_f;
+// 	int val_i;
+// 	switch (dst->type)
+// 	{
+// 	case 's':
+// 		return assign_string_field(dst, val);
+// 		break;
+// 	case 'S':
+// 		return assign_li_string((Li_String)(dst->ref), val);
+// 		break;
+// 	case 'd':
+// 	case 'f':
+// 		if (str_is_numeric(val))
+// 		{
+// 			if (dst->type == 'd')
+// 			{
+// 				val_i = atoi(val);
+// 				((int *)(dst->ref))[dst_offset] = val_i;
+// 			}
+// 			else
+// 			{
+// 				val_f = atof(val);
+// 				((float *)(dst->ref))[dst_offset] = val_f;
+// 			}
+// 		}
+// 		else // s -> n
+// 		{
+// 			if ((dst->annotation)[0] == '_')
+// 			{
+// 				return -1;
+// 			}
+// 			free(dst->ref);
+// #ifdef in_PC
+// 			new_count--;
+// 			cout << "#" << new_count << "#";
+// #endif // in_PC \
+// 	//dst->ref = new_li_string_by(val);
+// 			dst->ref = new_string_by(val);
+// 			dst->type = 's';
+// 		}
+// 		break;
+// 	default:
+// 		break;
+// 	}
+// 	return 0;
+// }
 
 // use relloc to reapply memory
-int assign_string_field(Field fed, const char *val)
-{
-	if (fed->annotation[0] == '_')
-		return -2; //protected cannot write
-	if (fed->type != 's')
-		return -3; //type error
-	int n = strlen(val);
-	void *p;
-	if (fed->ref != NULL)
-		p = realloc(fed->ref, n + 1);
-	else
-	{
-		p = malloc(n + 1); // init
-#ifdef in_PC
-		new_count++;
-		cout << "#" << new_count << "#";
-#endif // in_PC
-	}
+// int assign_string_field(Field fed, const char *val)
+// {
+// 	if (fed->annotation[0] == '_')
+// 		return -2; //protected cannot write
+// 	if (fed->type != 's')
+// 		return -3; //type error
+// 	int n = strlen(val);
+// 	void *p;
+// 	if (fed->ref != NULL)
+// 		p = realloc(fed->ref, n + 1);
+// 	else
+// 	{
+// 		p = malloc(n + 1); // init
+// #ifdef in_PC
+// 		new_count++;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC
+// 	}
 
-	if (p == NULL)
-		return -1;
-	fed->ref = p;
-	strcpy((char *)(p), val);
-	return 0;
-}
+// 	if (p == NULL)
+// 		return -1;
+// 	fed->ref = p;
+// 	strcpy((char *)(p), val);
+// 	return 0;
+// }
 
-void field_to_string(char *tx, Field fed, int off)
-{
-	switch (fed->type)
-	{
-	case 's':
-		if (fed->ref != NULL)
-			strcpy(tx, (char *)(fed->ref));
-		else
-			tx[0] = '\0';
-		break;
-	case 'f':
-		sprintf(tx, "%f", ((float *)(fed->ref))[off]);
+// void field_to_string(char *tx, Field fed, int off)
+// {
+// 	switch (fed->type)
+// 	{
+// 	case 's':
+// 		if (fed->ref != NULL)
+// 			strcpy(tx, (char *)(fed->ref));
+// 		else
+// 			tx[0] = '\0';
+// 		break;
+// 	case 'f':
+// 		sprintf(tx, "%f", ((float *)(fed->ref))[off]);
 
-		break;
-	case 'd':
-		_itoa(((int *)(fed->ref))[off], tx, 10);
-		// sprintf(tx, "%d", ((int *)(fed->ref))[off]);
-		break;
-	case 'S':
-		strcpy(tx, ((Li_String)(fed->ref))->str);
-		break;
-	default:
-		break;
-	}
-}
+// 		break;
+// 	case 'd':
+// 		_itoa(((int *)(fed->ref))[off], tx, 10);
+// 		// sprintf(tx, "%d", ((int *)(fed->ref))[off]);
+// 		break;
+// 	case 'S':
+// 		strcpy(tx, ((Li_String)(fed->ref))->str);
+// 		break;
+// 	default:
+// 		break;
+// 	}
+// }
 
 //a[n]=b[m]
 // numericly assignation
 int assign_var_from_var(Var dst, Var src, int at_dst, int at_src)
 {
-
-	// 	if (NorFedType(dst) == 'c') //dst type is string
-	// 	{
-	// 		if (source->type == 'C') // s->s
-	// 		{
-	// 			return assign_string_field(dst, (char *)(source->ref));
-	// 		}
-	// 		// n-> s
-	// 		free(dst->ref);
-	// #ifdef in_PC
-	// 		new_count--;
-	// 		cout << "#" << new_count << "#";
-	// #endif // in_PC
-	// 		dst->type = source->type;
-	// 		dst->ref = malloc(sizeof(float)); // note 4 byte[float and int] is ok there
-	// #ifdef in_PC
-	// 		new_count++;
-	// 		cout << "#" << new_count << "#";
-	// #endif // in_PC
-	// 		memcpy(dst->ref, source->ref, sizeof(float));
-	// 		return 0;
-	// 	}
-	// 	//n -> n
-	// 	if ((dst->annotation)[0] == '_' && NorFedType(dst) != NorFedType(source))
-	// 	{
-	// 		li_error("protected,type not match", -1);
-	// 	}
-	// 	if (source->type == 'c' && dst->type != 'c')
-	// 	{
-	// 		li_error("string type not supported", -2);
-	// 	}
-	// #define toType(d, t) ((t *)(d->ref))
-
 	float vs;
 	void *vp;
 	vp = get_value_of_var(src, at_src);
@@ -1040,7 +1057,7 @@ int assign_var_from_string(Var dst, char *val, int at)
 	switch (dst->type)
 	{
 	case 'c':
-		if (at)
+		if (at) // must start from head
 		{
 			li_error("type error", -34);
 		}
@@ -1113,7 +1130,7 @@ int assign_string_var(Var var, const char *val)
 //   it will return whole string, not a number in string
 void var_to_string(char *tx, Var var, int at)
 {
-	if (at & !var->isa)
+	if (at && !var->isa)
 	{
 		*tx = '\0'; //index error
 		return;
@@ -1125,7 +1142,7 @@ void var_to_string(char *tx, Var var, int at)
 			*tx = '\0'; //index out
 			return;
 		}
-		char *p = cast(var->type, char *);
+		char *p = cast(var->ref, char *);
 		strcpy(tx, p + at);
 		return;
 	}
@@ -1145,4 +1162,287 @@ void var_to_string(char *tx, Var var, int at)
 	default:
 		break;
 	}
+}
+
+Li_List valcues_of_vars(Li_List list)
+{
+	typedef char *string_;
+	string_ *item_strs = list_content(list, string_);
+	int n = list->count;
+	Li_List values = new_li_cap(float, n);
+	for (int i = 0; i < n; i++)
+	{
+		string_ name = item_strs[i];
+		float val = value_from_string_or_var(name);
+		if (isnan(val))
+		{
+			delete_list(values);
+			return NULL;
+		}
+		li_add(values, val);
+	}
+	return values;
+}
+
+/*get value from a string,support array index, only the value not string
+support like:
+a
+123.4
+a[1], field type 'f,d,c'
+a[b[n]]
+no \w or space in name
+return NAN if in error*/
+float value_from_string_or_var(string_ name)
+{
+	float val;
+	int idx1 = str_index(name, '[');
+	int idx2 = str_index_right(name, ']');
+	if (idx1 > 0 && idx2 > 0) //a[i]
+	{
+		name[idx1] = '\0';
+		name[idx2] = '\0';
+	}
+	if (str_is_name(name))
+	{
+		int index = search_var_in_Lily_ui(name);
+
+		if (index < 0)
+		{
+			return NAN;
+		}
+
+		int at = 0;
+		float vid;
+		if (idx1 > 0 && idx2 > 0) //a[i]
+		{
+			float vid = value_from_string_or_var(name + idx1 + 1);
+			if (isnan(vid))
+				return NAN;
+			if (vid - cast(vid, int) != 0.0f) //index must be a intergal
+				return NAN;
+			at = vid;
+		}
+		else if (!(idx1 < 0 && idx2 < 0))
+			return NAN;
+
+		Var var = li_vars + index;
+
+		void *p = get_value_of_var(var, at);
+
+		switch (var->type)
+		{
+		case 'f':
+			assign_f_from_void(vid, p);
+			break;
+		case 'd':
+		case 'c':
+			vid = void_to_int(p);
+			break;
+		default:
+			break;
+		}
+		return vid;
+	}
+	else if (str_is_numeric(name))
+	{
+		val = atof(name);
+	}
+	else
+	{
+		return NAN;
+	}
+	return val;
+}
+
+//return the index in "[]",
+//like 'a[1]', a[b[n]]
+// return -1 for error
+// return -2 if index is not a intergal
+// !note:if no [], 0 will be returned
+int ebrace_value_from_string(string_ name)
+{
+	int at=0;
+	int idx1 = str_index(name, '[');
+	int idx2 = str_index_right(name, ']');
+
+	if (idx1 > 0 && idx2 > 0) //a[i]
+	{
+		name[idx1] = '\0';
+		name[idx2] = '\0';
+		float vid = value_from_string_or_var(name + idx1 + 1);
+		if (isnan(vid))
+			return -1;
+		if (vid - cast(vid, int) != 0.0f) //index must be a intergal
+			return -2;
+		at = vid;
+	}
+	return at;
+}
+
+// assign, create, and show vars
+// >>a=1, a[2]=b, a[b[c]]=d, a=hello, a[4]
+// type conversion
+// >>a=123 $C, a $f,a $F, b $C
+
+int shell_do_var(char *rx)
+{
+	char *cmd = rx;
+	str_wrap(rx, ' '); //remove white spaces
+
+	int equ_idx = str_index(cmd, '=');
+	int typ_idx = str_index(cmd, '$');
+	char *rx1 = rx, *rx2 = NULL; // rx='a=123', rx1='a', rx2='123'
+
+	if (typ_idx > 0)
+	{
+		cmd[typ_idx] = '\0';
+		typ_idx = cmd[typ_idx + 1]; // Type
+	}
+
+	if (equ_idx > 0)
+	{
+		cmd[equ_idx] = '\0';
+		rx2 = cmd + equ_idx + 1;
+	}
+
+	int var1_idx = search_var_in_Lily_ui(rx1);
+
+	if (var1_idx < 0 && rx2 == NULL) // hit miss, >>adf
+	{
+		return 0; //do not dealing
+	}
+
+	Var var1 = NULL;
+
+	if (var1_idx >= 0)
+		var1 = li_vars + var1_idx;
+
+	int code = 0;
+	float rx2_value = NAN;
+	if (rx2 != NULL)
+		rx2_value = value_from_string_or_var(rx2);
+
+	int b1, b2;
+	b1 = str_index(rx1, '[');
+	b2 = str_index_right(rx1, ']');
+	float brace_val = NAN;
+	if (b1 > 0 && b2 > 0) //array
+	{
+		rx1[b2] = '\0';
+		rx1[b1] = '\0';
+		brace_val = value_from_string_or_var(rx1 + b1 + 1);
+		if (isnan(brace_val) || brace_val - (int)brace_val != 0.0f)
+		{
+			li_error("index must be a intergal", -32);
+		}
+	}
+
+	// creat new Field
+	if (var1 == NULL && rx2 != NULL) // e.g.: newField = a
+	{
+		//determine the type of var1
+		rx2_value = value_from_string_or_var(rx2);
+		char type;
+		if (typ_idx > 0)
+			type = typ_idx;
+		else if (isnan(rx2_value))
+			type = 'C'; //string type
+		else
+			type = 'f';
+
+		if (type != 'C' && isnan(rx2_value))
+			return 12; // error or not match
+
+		if (type == 'C')
+		{
+			code = public_new_vars_array(rx1, type, rx2, strlen(rx2) + 1);
+		}
+		else //determine to create a array or var
+		{
+			//aessert rx2_value is not NAN
+			if (!isnan(brace_val)) //array
+			{
+				if (toLower(type) == 'f')
+					code = public_new_vars_array(rx1, type, to_voidf(rx2_value), brace_val);
+				else
+					code = public_new_vars_array(rx1, type, to_void((int)rx2_value), brace_val);
+				brace_val = 0.0f;
+			} //single
+			else
+			{
+				if (type == 'f')
+					code = public_a_new_var(rx1, type, to_voidf(rx2_value));
+				else if (type == 'd' || type == 'c')
+					code = public_a_new_var(rx1, type, to_void((int)rx2_value));
+				else
+				{
+					li_error("type error", -53);
+				}
+			}
+		}
+
+		if (code < 0)
+		{
+			return code;
+		}
+		else
+		{
+			var1 = li_vars + code;
+		}
+	}
+	else if (var1 != NULL && rx2 != NULL) //reassign a field
+	{
+		// a
+		if (isUpper(typ_idx) && !var1->isa) //assign as a array
+		{
+			//but var is not an array
+			li_error("bad type cover", -17);
+		}
+
+		if (typ_idx > 0)
+		{
+			var1->type = toLower(typ_idx);
+		}
+
+		if (isnan(rx2_value))
+		{
+			if (var1->type == 'c' && var1->isa)
+				assign_string_var(var1, rx2);
+			else
+				code = -33; //assign error
+		}
+		else // assign number
+		{
+			if (isnan(brace_val))
+				brace_val = 0.0f;
+			if (var1->type == 'f')
+				code = set_value_of_var(var1, brace_val, to_voidf(rx2_value));
+			else if (var1->type == 'd' || var1->type == 'c')
+				code = set_value_of_var(var1, brace_val, to_void((int)rx2_value));
+			else
+			{
+				li_error("type error", -63);
+			}
+		}
+		if (code < 0)
+		{
+			return code;
+		}
+	}
+
+	//show
+	lily_out(var1->name);
+	if (b1 > 0 && b2 > 0)
+	{
+		sprintf(tx, "[%d]", cast(brace_val, int));
+		lily_out(tx);
+	}
+	tx[0] = '=';
+	if (isnan(brace_val))
+		var_to_string(tx + 1, var1, 0);
+	else
+		var_to_string(tx + 1, var1, brace_val);
+	lily_out(tx);
+	lily_out("\n");
+	return 1;
 }

@@ -14,15 +14,15 @@ typedef struct
 	char id;
 }Cmd_def;
 
-typedef struct
-{
-	char* name;// may from a memory
-	const char* annotation;
-	void* ref;
-	char type;//'f','d','c',
-	char length;
-}Field_def;
-
+//typedef struct
+//{
+//	char* name;// may from a memory
+//	const char* annotation;
+//	void* ref;
+//	char type;//'f','d','c',
+//	char length;
+//}Field_def;
+//
 #define to_voidf(x) (void *)(*(int *)&x)
 #define to_void(x) ((void *)x)
 #define void_to_int(p) ((int)p)
@@ -49,12 +49,12 @@ typedef struct
 
 typedef struct
 {
-	Lily_List* cmds, * fields,* funs, *vars;// , * hijacks;
+	Lily_List* cmds,/* * fields,*/* funs, *vars;// , * hijacks;
 	bool para_updated, hijacked;
 }Lily_cmds_def;
 // cmds and fields is copied since from adding.
 
-typedef Field_def* Field;
+//typedef Field_def* Field;
 typedef Var_def* Var;
 typedef Cmd_def* Cmd;
 typedef Fun_def* Fun;
@@ -93,6 +93,7 @@ void add_listener(Tasks_def f);
 int search_cmd_in_Lily_ui(char* item);
 int search_field_in_Lily_ui(char* item);
 int search_fun_in_Lily_ui(char* item);
+int search_var_in_Lily_ui(char *item);
 
 int help(int a, char** b);
 
@@ -106,8 +107,8 @@ int system(int n, char** arg);
 int delay_cmd(int n, char** arg);
 
 int public_a_cmd_link(const char* name, Arg_Tasks_def link);
-int public_a_field_ref(const char* name, void* link);
-int public_a_field_ref_type(const char* name, void*link,char type);
+//int public_a_field_ref(const char* name, void* link);
+//int public_a_field_ref_type(const char* name, void*link,char type);
 int public_a_fun_link(const char* name, void* link);
 int public_a_fun_link_n(const char* name, void* link, char n);
 int public_a_fun_link_int(const char* name, void* link, char n);
@@ -124,11 +125,12 @@ int cmd_hijack_sleep(int n, char **arg);
 //this will copy a backup
 #define public_cmd(new_cmd) list_add(lily_ui.cmds, &new_cmd)
 //new_field: type of Field_def, not ref
-#define public_field(new_field) list_add(lily_ui.fields, &new_field)
+//#define public_field(new_field) list_add(lily_ui.fields, &new_field)
 #define public_fun(new_fun) list_add(lily_ui.funs, &new_fun)
 
 //e.g.: Field fields = li_fields;
-#define li_fields ((Field)(lily_ui.fields->content))
+//#define li_fields ((Field)(lily_ui.fields->content))
+#define li_vars ((Var)(lily_ui.vars->content))
 #define li_cmds ((Cmd)(lily_ui.cmds->content))
 #define li_funs ((Fun)(lily_ui.funs->content))
 

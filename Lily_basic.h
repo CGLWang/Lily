@@ -14,6 +14,7 @@ int str_contains(char* s, char c);
 int str_contains_by_str(char* s, char* c);
 char str_equal(const char* s,const char* cmd);
 int str_index(char* s, char c);
+int str_index_right(char* s, char c);
 char str_lower(char* str);
 char str_replace(char* s, char from, char to);
 char str_replace_by_str(char* s,const char* from, char to);
@@ -86,3 +87,6 @@ char* new_string_by(char* str);
 void delete_li_string(Li_String li);
 
 int assign_li_string(Li_String li, char* source);
+
+int str_wrap(char *s, char c);
+int str_wrap_by_str(char *s, char *cs);

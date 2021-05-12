@@ -180,8 +180,8 @@ int lily_do(char *rx)
 
 	int code;
 	typedef int (*shell_do_def)(char *);
-	static shell_do_def shell_do[] = {shell_do_cmd, shell_do_fun, shell_do_cal, shell_do_fields, shell_do_notFound};
-	static char rx_back[32];
+	static shell_do_def shell_do[] = {shell_do_cmd, shell_do_fun, shell_do_cal, shell_do_var, shell_do_notFound};
+	char rx_back[32];
 	for (int i = 0; i < 5; i++)
 	{
 		strcpy(rx_back, rx);
@@ -198,7 +198,8 @@ int lily_do(char *rx)
 		lily_out(rx);
 		sprintf(tx, "\a\nerror(%d):", code);
 		lily_out(tx);
-		lily_out((char *)lily_error_msg);
+		if(lily_error_msg!=NULL)
+			lily_out((char *)lily_error_msg);
 		lily_out("\n");
 	}
 	//if (lily_hooks_cmd_done != NULL)
@@ -255,19 +256,19 @@ int search_cmd_in_Lily_ui(char *item)
 	}
 	return -1;
 }
-int search_field_in_Lily_ui(char *item)
-{
-	int i, n;
-	n = lily_ui.fields->count;
-	Field fields = (Field)(lily_ui.fields->content);
-	for (i = 0; i < n; i++)
-	{
-		if (!str_equal(item, fields[i].name))
-			continue;
-		return i;
-	}
-	return -1;
-}
+// int search_field_in_Lily_ui(char *item)
+// {
+// 	int i, n;
+// 	n = lily_ui.fields->count;
+// 	Field fields = (Field)(lily_ui.fields->content);
+// 	for (i = 0; i < n; i++)
+// 	{
+// 		if (!str_equal(item, fields[i].name))
+// 			continue;
+// 		return i;
+// 	}
+// 	return -1;
+// }
 int search_fun_in_Lily_ui(char *item)
 {
 	int i, n;
@@ -304,20 +305,21 @@ int help(int nargin, char **arg)
 			lily_out(tx);
 			continue;
 		}
-		Field q = li_fields; // (Field_def*)(lily_ui.fields->content);
-		index = search_field_in_Lily_ui(item);
-		if (index >= 0)
-		{
-			char s[] = "f";
-			sprintf(tx, ">>%s:%s, type:", q[index].name, q[index].annotation);
-			lily_out(tx);
-			s[0] = q[index].type;
-			lily_out(s);
-			lily_out("\n");
-			//sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
-			//lily_cout(tx);
-			continue;
-		}
+		// Field q = li_fields; // (Field_def*)(lily_ui.fields->content);
+		// Var q = li_vars;
+		// index = search_field_in_Lily_ui(item);
+		// if (index >= 0)
+		// {
+		// 	char s[] = "f";
+		// 	sprintf(tx, ">>%s:%s, type:", q[index].name, q[index].annotation);
+		// 	lily_out(tx);
+		// 	s[0] = q[index].type;
+		// 	lily_out(s);
+		// 	lily_out("\n");
+		// 	//sprintf(tx, ">>%s: id:%d, %s\n", p[index].name, p[index].id, p[index].annotation);
+		// 	//lily_cout(tx);
+		// 	continue;
+		// }
 		lily_out(">>not found help of:");
 		lily_out(item);
 		lily_out("\n");
@@ -340,13 +342,13 @@ int help(int nargin, char **arg)
 		lily_out(tx);
 	}
 
-	Field_def *q = (Field_def *)(lily_ui.fields->content);
-	lily_out(">fields:\n");
-	for (int i = 0; i < lily_ui.fields->count; i++)
-	{
-		sprintf(tx, "%s\n", q[i].name);
-		lily_out(tx);
-	}
+	// Field_def *q = (Field_def *)(lily_ui.fields->content);
+	// lily_out(">fields:\n");
+	// for (int i = 0; i < lily_ui.fields->count; i++)
+	// {
+	// 	sprintf(tx, "%s\n", q[i].name);
+	// 	lily_out(tx);
+	// }
 	return 0;
 }
 
@@ -385,33 +387,45 @@ int delete_field(int n, char **arg)
 	// if (n < 2 )return -1;
 	for (; i < n; i++)
 	{
-		int index = search_field_in_Lily_ui(arg[i]);
+		// int index = search_field_in_Lily_ui(arg[i]);
+		int index = search_var_in_Lily_ui(arg[i]);
 		if (index < 0)
 		{
 			lily_out(arg[1]);
 			lily_out(" not found\n");
 			return -1;
 		}
-		Field_def *q = (Field_def *)(lily_ui.fields->content);
-		if (q[index].annotation[0] == '_')
-			return -3; //protected
-		free(q[index].name);
+		Var var = li_vars + index;
+		if (var->isb)
+			return -3;
+		// Field_def *q = (Field_def *)(lily_ui.fields->content);
+		// if (q[index].annotation[0] == '_')
+		// 	return -3; //protected
+		// free(q[index].name);
+		free(cast(var->name, void *));
 #ifdef in_PC
 		new_count--;
 		cout << "#" << new_count << "#";
 #endif // in_PC
-
-		free(q[index].ref);
+		if (var->isa)
+		{
+			free(var->ref);
 #ifdef in_PC
-		new_count--;
-		cout << "#" << new_count << "#";
-#endif // in_PC                          \
+			new_count--;
+			cout << "#" << new_count << "#";
+#endif // in_PC
+		}
+		// free(q[index].ref);
+// #ifdef in_PC
+// 		new_count--;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC                          \
 	//if (q[index].annotation[0] != '_') \
 	//	free(q[index].name);              \
 	//if (q[index].type == 's')          \
 	//delete_li_string((Li_String)(q[index].ref));
 
-		list_remove_at(lily_ui.fields, index);
+		list_remove_at(lily_ui.vars, index);
 	}
 	if (user_do)
 		lily_out("done\n");
@@ -427,18 +441,22 @@ int whos(int nargin, char **arg)
 		char *item = NULL;
 		item = arg[now];
 
-		Field_def *q = (Field_def *)(lily_ui.fields->content);
-		int n = lily_ui.fields->count;
+		//Field_def *q = (Field_def *)(lily_ui.fields->content);
+		Var q = li_vars;
+		int n = lily_ui.vars->count;
 		for (int i = 0; i < n; i++)
 		{
 			if (str_equal(item, q[i].name))
 			{
-				char s[] = "f";
-				sprintf(tx, ">>%s:%s, type:", q[i].name, q[i].annotation);
+				//char s[] = "f";
+				if (q[i].isa)
+					sprintf(tx, ">>%s type:%c%c*%d\n", q[i].name, q[i].isb ? '_' : ' ', q[i].type, q[i].len);
+				else
+					sprintf(tx, ">>%s type:%c%c\n", q[i].name, q[i].isb ? '_' : ' ', q[i].type);
 				lily_out(tx);
-				s[0] = q[i].type;
+				/*s[0] = q[i].type;
 				lily_out(s);
-				lily_out("\n");
+				lily_out("\n");*/
 				hit = true;
 				break;
 			}
@@ -454,12 +472,16 @@ int whos(int nargin, char **arg)
 	if (nargin > 1)
 		return 0;
 
-	Field_def *q = (Field_def *)(lily_ui.fields->content);
-	for (int i = 0; i < lily_ui.fields->count; i++)
+	Var q = li_vars;
+	int n = lily_ui.vars->count;
+
+	for (int i = 0; i < n; i++)
 	{
 		sprintf(tx, "%s:", q[i].name);
 		lily_out(tx);
-		switch (q[i].type)
+		var_to_string(tx, q + i, 0);
+
+		/*switch (q[i].type)
 		{
 		case 's':
 			sprintf(tx, "%s\n", ((char *)(q[i].ref)));
@@ -475,8 +497,9 @@ int whos(int nargin, char **arg)
 			break;
 		default:
 			break;
-		}
+		}*/
 		lily_out(tx);
+		lily_out("\n");
 	}
 	return 0;
 }
@@ -527,24 +550,24 @@ int public_a_cmd_link(const char *name, Arg_Tasks_def link)
 // no extra memory, save nothing, used in built in var
 //e.g.: public_a_field_ref("test_field", &test_fields);
 //return index
-int public_a_field_ref(const char *name, void *link)
-{
-	Field_def fed;
-	fed.name = (char *)name;
-	fed.annotation = (char *)"_builtIn"; // strats with '_' means this field is protected
-	fed.ref = link;
-	fed.type = 'f';
-	return public_field(fed);
-}
-int public_a_field_ref_type(const char *name, void *link, char type)
-{
-	Field_def fed;
-	fed.name = (char *)name;
-	fed.annotation = "_builtIn"; // strats with '_' means this field is protected
-	fed.ref = link;
-	fed.type = type;
-	return public_field(fed);
-}
+// int public_a_field_ref(const char *name, void *link)
+// {
+// 	Field_def fed;
+// 	fed.name = (char *)name;
+// 	fed.annotation = (char *)"_builtIn"; // strats with '_' means this field is protected
+// 	fed.ref = link;
+// 	fed.type = 'f';
+// 	return public_field(fed);
+// }
+// int public_a_field_ref_type(const char *name, void *link, char type)
+// {
+// 	Field_def fed;
+// 	fed.name = (char *)name;
+// 	fed.annotation = "_builtIn"; // strats with '_' means this field is protected
+// 	fed.ref = link;
+// 	fed.type = type;
+// 	return public_field(fed);
+// }
 int public_a_fun_link(const char *name, void *link)
 {
 	Fun_def fun = {(char *)name, link, 255, 'f'};
@@ -578,74 +601,74 @@ int joint_args(int n, char **args)
 }
 
 // creat a new li_string to save [s]
-int public_a_new_string_field(char *name, char *s)
-{
-	Field_def fed;
-	fed.annotation = (char *)"UserField";
-	fed.name = (char *)malloc(strlen(name) + 1);
-#ifdef in_PC
-	new_count++;
-	cout << "#" << new_count << "#";
-#endif // in_PC
-	if (fed.name == NULL)
-		return -1;
-	strcpy(fed.name, name);
-	//Li_String li = new_li_string_by(s);
-	//if (li == NULL)return -1;
-	void *p = new_string_by(s);
-	if (p == NULL)
-		return -2;
-	fed.ref = p;
-	fed.type = 's';
-	return public_field(fed);
-}
+// int public_a_new_string_field(char *name, char *s)
+// {
+// 	Field_def fed;
+// 	fed.annotation = (char *)"UserField";
+// 	fed.name = (char *)malloc(strlen(name) + 1);
+// #ifdef in_PC
+// 	new_count++;
+// 	cout << "#" << new_count << "#";
+// #endif // in_PC
+// 	if (fed.name == NULL)
+// 		return -1;
+// 	strcpy(fed.name, name);
+// 	//Li_String li = new_li_string_by(s);
+// 	//if (li == NULL)return -1;
+// 	void *p = new_string_by(s);
+// 	if (p == NULL)
+// 		return -2;
+// 	fed.ref = p;
+// 	fed.type = 's';
+// 	return public_field(fed);
+// }
 // when use this function to public a field
 // note:
 // it will apply a new memory to save [name] and [val], so when delete a field, free that first
 // this publication is only support a int and float field, for a string field, using [public_a_new_string_field]
 // return the index of new field, if it<0, error occured
-int public_a_new_field(char *name, char type, float val)
-{
-	Field_def fed;
-	fed.annotation = (char *)"UserField";
-	fed.name = (char *)malloc(strlen(name) + 1);
-#ifdef in_PC
-	new_count++;
-	cout << "#" << new_count << "#";
-#endif // in_PC
-	if (fed.name == NULL)
-		return -1;
-	strcpy(fed.name, name);
-	void *li = NULL;
-	switch (type)
-	{
-	case 'f':
-		li = malloc(sizeof(float));
-#ifdef in_PC
-		new_count++;
-		cout << "#" << new_count << "#";
-#endif // in_PC
-		if (li == NULL)
-			return -1;
-		*((float *)li) = val;
-		break;
-	case 'd':
-		li = malloc(sizeof(int));
-#ifdef in_PC
-		new_count++;
-		cout << "#" << new_count << "#";
-#endif // in_PC
-		if (li == NULL)
-			return -1;
-		*((int *)li) = (int)val;
-		break;
-	default:
-		break;
-	}
-	fed.ref = li;
-	fed.type = type;
-	return public_field(fed);
-}
+// int public_a_new_field(char *name, char type, float val)
+// {
+// 	Field_def fed;
+// 	fed.annotation = (char *)"UserField";
+// 	fed.name = (char *)malloc(strlen(name) + 1);
+// #ifdef in_PC
+// 	new_count++;
+// 	cout << "#" << new_count << "#";
+// #endif // in_PC
+// 	if (fed.name == NULL)
+// 		return -1;
+// 	strcpy(fed.name, name);
+// 	void *li = NULL;
+// 	switch (type)
+// 	{
+// 	case 'f':
+// 		li = malloc(sizeof(float));
+// #ifdef in_PC
+// 		new_count++;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC
+// 		if (li == NULL)
+// 			return -1;
+// 		*((float *)li) = val;
+// 		break;
+// 	case 'd':
+// 		li = malloc(sizeof(int));
+// #ifdef in_PC
+// 		new_count++;
+// 		cout << "#" << new_count << "#";
+// #endif // in_PC
+// 		if (li == NULL)
+// 			return -1;
+// 		*((int *)li) = (int)val;
+// 		break;
+// 	default:
+// 		break;
+// 	}
+// 	fed.ref = li;
+// 	fed.type = type;
+// 	return public_field(fed);
+// }
 
 // wait key for n times
 int hijackor_wait_key(int n, char **s)
@@ -699,16 +722,16 @@ int cmd_echo(int n, char **arg)
 	//	Field fed = li_fields;
 	for (; now < n; now++)
 	{
-		index = search_field_in_Lily_ui(arg[now]);
-		if (index < 0)
-		{
-			lily_out(arg[now]);
-		}
-		else
-		{
-			field_to_string(tx, li_fields + index, 0);
-			lily_out(tx);
-		}
+		// index = search_field_in_Lily_ui(arg[now]);
+		// if (index < 0)
+		// {
+		lily_out(arg[now]);
+		// }
+		// else
+		// {
+		// 	field_to_string(tx, li_fields + index, 0);
+		// 	lily_out(tx);
+		// }
 
 		if (now < n - 1)
 			lily_out(", ");
@@ -736,42 +759,49 @@ int hijack_sleep(int n, char **arg)
 }
 int cmd_hijack_sleep(int n, char **arg)
 {
-	int sleep_time = 1;
+	float sleep_time = 1.0f;
 	if (n < 1)
 	{
 		li_error("bad arg", -1);
 	}
 	if (n >= 2)
 	{
-		if (str_is_numeric(arg[1]))
+		sleep_time = value_from_string_or_var(arg[1]);
+		if (isnan(sleep_time))
 		{
-			sleep_time = atoi(arg[1]);
+			li_error("field miss", -2);
 		}
-		else
-		{
-			int index = search_field_in_Lily_ui(arg[1]);
-			if (index < 0)
-			{
-				li_error("field miss", -2);
-			}
-			Field fed = li_fields + index;
-			switch (fed->type)
-			{
-			case 'f':
-				sleep_time = *(float *)(fed->ref);
-				break;
-			case 'd':
-				sleep_time = *(int *)(fed->ref);
-				break;
-			default:
-				li_error("field type not match", -3);
-				//				break;
-			}
-		}
+
+		// if (str_is_numeric(arg[1]))
+		// {
+		// 	sleep_time = atoi(arg[1]);
+		// }
+		// else
+		// {
+		// 	// int index = search_field_in_Lily_ui(arg[1]);
+		// 	int index = search_var_in_Lily_ui(arg[1]);
+		// 	if (index < 0)
+		// 	{
+		// 		li_error("field miss", -2);
+		// 	}
+		// 	Field fed = li_fields + index;
+		// 	switch (fed->type)
+		// 	{
+		// 	case 'f':
+		// 		sleep_time = *(float *)(fed->ref);
+		// 		break;
+		// 	case 'd':
+		// 		sleep_time = *(int *)(fed->ref);
+		// 		break;
+		// 	default:
+		// 		li_error("field type not match", -3);
+		// 		//				break;
+		// 	}
+		// }
 	}
 
-	if (sleep_time < 1)
-		sleep_time = 1;
+	if (sleep_time < 0.026f)
+		sleep_time = 0.026f;
 	add_hijack(hijack_sleep);
 	// public_a_timer(sleep_timer,Second(sleep_time));
 	create_or_change_quick_timer_count(sleep_timer, Second(sleep_time));
@@ -846,6 +876,8 @@ int public_new_vars_array(char *name, char type, void *val, int len)
 
 	//value
 	void *li = NULL;
+	if (islower(type))
+		type = toUpper(type);
 	if (type == 'C')
 	{
 		li = malloc(len);
@@ -886,6 +918,7 @@ int public_new_vars_array(char *name, char type, void *val, int len)
 
 	var.ref = li;
 	var.type = toLower(type);
+	var.len = len;
 	return public_var(var);
 }
 // at: the index of value, only valid when var.isa=1
@@ -1004,6 +1037,20 @@ void delete_a_var(Var var)
 		cout << "#" << new_count << "#";
 #endif // in_PC
 	}
+}
+
+int search_var_in_Lily_ui(char *item)
+{
+	int i, n;
+	n = lily_ui.vars->count;
+	Var fields = li_vars;
+	for (i = 0; i < n; i++)
+	{
+		if (!str_equal(item, fields[i].name))
+			continue;
+		return i;
+	}
+	return -1;
 }
 
 // type conversion:

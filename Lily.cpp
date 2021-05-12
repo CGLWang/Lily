@@ -57,12 +57,13 @@ void lily_init()
 {
 	tasks[0] = task_mointor;
 	lily_ui.cmds = new_list(sizeof(Cmd_def), 10);
-	lily_ui.fields = new_list(sizeof(Field_def), 10);
+	//lily_ui.fields = new_list(sizeof(Field_def), 10);
+	lily_ui.vars = new_list(sizeof(Var_def), 10);
 	lily_ui.funs = new_list(sizeof(Fun_def), 4);
 	//lily_ui.hijacks = new_list(sizeof(hijack), 4);
 	lily_ui.para_updated = false;
 	lily_ui.hijacked = false;
-	if (lily_ui.cmds == NULL || lily_ui.fields == NULL|| lily_ui.funs ==NULL)
+	if (lily_ui.cmds == NULL/* || lily_ui.fields == NULL*/|| lily_ui.funs ==NULL)
 	{
 		lily_out("lily init failed!");
 		return;
@@ -146,14 +147,15 @@ void lily_init()
 
 	public_a_fun_link_n("time", time_cmd, 0);
 	public_a_fun_link_n("er", echo_error, 0);
-	Field_def fed = { (char*)"rcount",(char*)"_rxCount",(float*)&r_count,'d' };
-	public_field(fed);
+	//Field_def fed = { (char*)"rcount",(char*)"_rxCount",(float*)&r_count,'d' };
+	//public_field(fed);
+	public_a_var_ref("rcount", &r_count, 'd');
 #endif
-	fed.name = (char*)"tx";
-	fed.annotation = "_builtIn";
-	fed.type = 's';
-	fed.ref = tx;
-	public_field(fed);
+	//fed.name = (char*)"tx";
+	//fed.annotation = "_builtIn";
+	//fed.type = 's';
+	//fed.ref = tx;
+	//public_field(fed);
 	//public_field(fed);
 	//public_a_new_string_field((char*)"test",(char*) "test");
 	//timer

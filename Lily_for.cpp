@@ -22,12 +22,14 @@ extern int new_count;
 typedef char *str;
 typedef struct
 {
-	Field iter_field;	   //迭代变量指针
+	Var iter_field;		   //迭代变量指针
 	Li_List for_cmd_lines; //循环执行的指令列表
 	float end_val, step_val;
 	char now_at;			//执行指令计数
+	char var_at; //迭代变量 偏置
 	char need_delete_field; //end时是否需要删除变量
 	char be_greater;		//迭代方向，增加/减小
+	
 } ForItem_def;
 
 typedef struct
@@ -48,7 +50,8 @@ float *end_val, *step_val;
 char *now_at;
 char *be_greater;
 char *need_delete_field;
-Field iter_field = NULL;
+Var iter_field = NULL;
+char var_at = 0;
 Li_String scopy = NULL;
 char wait_for_end_count = 0;
 char in_filling = 0;
@@ -90,7 +93,7 @@ int cmd_for_start(int n, char *args[]) // call by lily_do
 	Lily_List numbers_a;
 	numbers_a.content = (char *)(args + 1);
 	numbers_a.count = items->count - 1;
-	Li_List numbers = valcues_of_fields(&numbers_a); // new
+	Li_List numbers = valcues_of_vars(&numbers_a); // new
 	if (numbers == NULL)
 	{
 		delete_list(items);
@@ -130,11 +133,11 @@ int cmd_for_start(int n, char *args[]) // call by lily_do
 		li_error("bad step", -2);
 	}
 
-	int iter_field_index = search_field_in_Lily_ui(args[0]);
+	int iter_field_index = search_var_in_Lily_ui(args[0]);
 	need_delete_field_ = 0;
 	if (iter_field_index < 0)
 	{
-		iter_field_index = public_a_new_field(args[0], 'f', start);
+		iter_field_index = public_a_new_var(args[0], 'f', to_voidf(start));
 		need_delete_field_ = 1;
 		if (iter_field_index < 0) // not create new field
 		{
@@ -144,22 +147,31 @@ int cmd_for_start(int n, char *args[]) // call by lily_do
 			lily_out("\aerror -12:build new field failed\n");
 			li_error("apply filed", -12);
 		}
-		iter_field = li_fields + iter_field_index;
+		iter_field = li_vars + iter_field_index;
 	}
 	else
 	{
-		iter_field = li_fields + iter_field_index;
+		iter_field = li_vars + iter_field_index;
+		var_at = ebrace_value_from_string(args[0]);
+		if (var_at < 0)
+		{
+			var_at = 0;
+		}
+
 		switch (iter_field->type)
 		{
 		case 'f':
-			*(float*)(iter_field->ref) = start;
+			set_value_of_var(iter_field, var_at, to_voidf(start));
+			// *(float *)(iter_field->ref) = start;
 			break;
 		case 'd':
-			*(int*)(iter_field->ref) = start;
+		case 'c':
+			set_value_of_var(iter_field, var_at, to_void((int)start));
+			// *(int *)(iter_field->ref) = start;
 			break;
 		default:
 			delete_list(items);
-			li_error("bad field", -5);
+			li_error("bad var", -5);
 			break;
 		}
 	}
@@ -171,8 +183,9 @@ int cmd_for_start(int n, char *args[]) // call by lily_do
 	// create successful
 	//push it to stack
 
-	ForItem_def* area = for_area_stack + for_stack_count;
+	ForItem_def *area = for_area_stack + for_stack_count;
 	area->iter_field = iter_field;
+	area->var_at = var_at;
 	area->for_cmd_lines = for_cmd_lines;
 	// area->start_val = start;
 	area->end_val = endv;
@@ -242,18 +255,28 @@ int do_for_loop()
 	if (++*now_at >= for_cmd_lines->count)
 	{
 		float start_val;
+		int vi;
 		*now_at = 0;
 		// *start_val += *step_val;
 		switch (iter_field->type)
 		{
 		case 'f':
-			*(float *)(iter_field->ref) += *step_val;
-			start_val = *(float *)(iter_field->ref);
+			assign_f_from_void(start_val,get_value_of_var(iter_field,var_at));
+			start_val += *step_val;
+			set_value_of_var(iter_field,var_at,to_voidf(start_val));
+			// *(float *)(iter_field->ref) += *step_val;
+			// start_val = *(float *)(iter_field->ref);
 			break;
 		case 'd':
-			*(int *)(iter_field->ref) += *step_val;
-			start_val = *(int *)(iter_field->ref);
+		case 'c':
+			vi = (int)get_value_of_var(iter_field,var_at);
+			vi+= *step_val;// abs(step_val)>1
+			set_value_of_var(iter_field,var_at,to_void(vi));
+			
+			// *(int *)(iter_field->ref) += *step_val;
+			start_val = vi;//*(int *)(iter_field->ref);
 			break;
+		
 		default:
 			break;
 		}
@@ -307,7 +330,7 @@ int end_for()
 
 	if (*need_delete_field)
 	{
-		delete_field(1, &(iter_field->name));
+		delete_field(1, (char **)(&(iter_field->name)));
 		iter_field = NULL;
 		need_delete_field = NULL;
 	}
@@ -352,6 +375,7 @@ void update_for_area()
 	}
 	ForItem_def *area = for_area_stack + for_stack_count - 1;
 	iter_field = area->iter_field;
+	var_at = area->var_at;
 	for_cmd_lines = area->for_cmd_lines;
 	// start_val = &area->start_val;
 	end_val = &area->end_val;
@@ -379,31 +403,40 @@ int cmd_loop_start(int n, char *args[]) //loop 3
 		return -1;
 	//get loop count
 	int loop_count_;
-	if (str_is_numeric(args[1]))
+	float v = value_from_string_or_var(args[1]);
+	if (!isnan(v))
 	{
-		loop_count_ = atoi(args[1]);
+		loop_count_ = v;
 	}
 	else
 	{
-		int index = search_field_in_Lily_ui(args[1]);
-		if (index < 0)
-		{
-			li_error("field miss", -2);
-		}
-		Field fed = li_fields + index;
-		switch (fed->type)
-		{
-		case 'f':
-			loop_count_ = *(float *)(fed->ref);
-			break;
-		case 'd':
-			loop_count_ = *(int *)(fed->ref);
-			break;
-		default:
-			li_error("field type not match", -3);
-			break;
-		}
+		li_error("bad arg", -2);
 	}
+	// if (str_is_numeric(args[1]))
+	// {
+	// 	loop_count_ = atoi(args[1]);
+	// }
+	// else
+	// {
+	// 	int index = search_field_in_Lily_ui(args[1]);
+	// 	if (index < 0)
+	// 	{
+	// 		li_error("field miss", -2);
+	// 	}
+	// 	Var fed = li_vars + index;
+	// 	switch (fed->type)
+	// 	{
+	// 	case 'f':
+	// 		loop_count_ = *(float *)(fed->ref);
+	// 		break;
+	// 	case 'd':
+	// 		loop_count_ = *(int *)(fed->ref);
+	// 		break;
+	// 	default:
+	// 		li_error("field type not match", -3);
+	// 		break;
+	// 	}
+	// }
 
 	loop_cmd_lines = new_list(sizeof(str), 4);
 	if (loop_cmd_lines == NULL)
